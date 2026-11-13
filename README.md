@@ -37,9 +37,40 @@ By hand:
 4. Run `herdr-app check ~/.config/herdr-app/mods/<name>` for each mod, then
    `herdr-app do layout.switch '{"name":"orca"}'`. `ctrl-shift-l` switches back.
 
+Keys follow Herdr's own conventions: `cmd-n` stays "New space", and the Create worktree
+dialog opens with `cmd-alt-n` instead. Everything in `keys.json`'s `layout:orca` section
+(agent navigation, the sidebar panel toggle, closing tabs and panes) applies only while this
+layout is shown, so it never shadows the keys of your other layouts.
+
 Needs `git` and a logged-in `gh`. Usage limits read the `claude` and `codex` CLIs; Automations uses
 the `herdr-automations` CLI; desktop notifications use `terminal-notifier` when installed. Built and
-tested on macOS with Herdr 0.1.13.
+tested on macOS with Herdr 0.1.13 — macOS first: Linux misses the issue prefill's `pbcopy`/`pbpaste`,
+and Windows has no sleep for spaces (the hibernate mod warns at runtime); the rest follows the same
+paths. See "What this runs" below for everything the mods execute and reach.
+
+## What this runs
+
+The mods shell out and touch the network; this is the whole surface, so you can judge it before
+installing:
+
+- **Programs:** `git` (branches, remotes, worktrees), `gh` (issues, PRs, repos — needs a logged-in
+  `gh`), `lsof`, `ss`, `ps`, `pgrep` and `kill` (live ports, the resource meter, sleep), `sysctl`
+  (the resource meter), `curl` (Network below), `open` / `xdg-open` / `powershell` / `code` (open a
+  file, folder or link), `sips` / `convert` (project icons), `osascript` / `terminal-notifier` /
+  `notify-send` (desktop notifications), `pbcopy` / `pbpaste` (issue prefill), `printenv` (a remote
+  machine's home folder), `herdr-automations` (Automations), `hc` (Herdr's own CLI), and small `sh`
+  scripts with the usual tools (`grep`, `sed`, `awk`, `jq`, `mkdir`, `find`, `cp`, `rm`, `date`,
+  `sleep`). Usage limits ask the `claude` and `codex` CLIs: the CLIs authenticate themselves, and
+  nothing here sees their tokens.
+- **Network:** GitHub only. `gh` talks to the GitHub API. `curl` downloads avatar and project
+  pictures from `github.com`, and pictures an issue or PR body refers to. For a picture on a private
+  repository, the `gh` token reaches curl through stdin — never an argument or a command line — and
+  only for `https://github.com/` URLs; curl drops it when GitHub redirects to its storage host.
+  Nothing else is fetched.
+- **Files:** the usage-limits helpers read the session logs (`~/.claude/sessions/`, honoring
+  `CLAUDE_CONFIG_DIR`, and Codex's rollout files) to count tokens and calls — only numbers leave
+  those scripts. Hibernate reads just the session id out of the same files, to resume an agent after
+  sleep. No credentials are read.
 
 ## Updating this repo
 

@@ -4,7 +4,7 @@ import { spaces, panes, focused, exec, run, theme, openOverlay, closeOverlay, pr
 import { spaceFor, startWorkspace } from "./start.js";
 import { Viewer, openUrl, labelChip } from "./viewer.js";
 import { icons, icon, avatarPath, loadAvatar } from "./icons.js";
-import { readCache, writeCache, age, repoChanged } from "./cache.js";
+import { readCache, writeCache, age, repoChanged, ghNotice } from "./cache.js";
 import { Projects, filterMenuView } from "./projects.js";
 
 // Orca-style issues and PRs table, opened as a popup (mod.json overlay).
@@ -87,9 +87,10 @@ export default class Issues extends View {
   refreshRepos(cx) {
     if (Date.now() - (shared("issues.allRepos")?.at ?? 0) < REPOS_TTL) return;
     cx.spawn(async () => {
+      // Herdr's exec takes a command name and an argument array (no shell); failures say why once.
       const r = await exec("gh", ["api", "--paginate", "user/repos?per_page=100&sort=pushed&affiliation=owner,collaborator,organization_member",
-        "-q", '.[] | [.full_name, (.private | tostring)] | @tsv']).catch(() => null);
-      if (r?.code !== 0) return;
+        "-q", '.[] | [.full_name, (.private | tostring)] | @tsv']).catch((e) => { ghNotice(`Cannot run gh (${String(e).trim()})`); return null; });
+      if (r?.code !== 0) { ghNotice((r?.stderr || "gh could not list your repositories").trim()); return; }
       const list = r.stdout.split("\n").filter(Boolean).map((l) => { const [repo, priv] = l.split("\t"); return { repo, private: priv === "true" }; });
       if (list.length) setShared("issues.allRepos", { at: Date.now(), list });
     });
@@ -112,6 +113,9 @@ export default class Issues extends View {
       if (r?.code === 0) { this.repos[id] = r.stdout.trim(); remember("folders", id, this.repos[id]); }
       // Only a definite "not a GitHub repo" is remembered; an offline failure is asked again.
       else if (/not a git repository|no git remotes|none of the git remotes/i.test(r?.stderr ?? "")) remember("misses", id, Date.now());
+      // gh itself is the problem (missing, unauthenticated, offline): say so once.
+      else if (!r) ghNotice("Cannot run gh");
+      else ghNotice((r.stderr || "gh could not read this folder's repository").trim());
     }
     return this.repos[id] ?? null;
   }
@@ -133,6 +137,8 @@ export default class Issues extends View {
         if (!this.logins[id]) {
           const r = await exec("gh", ["api", "user", "-q", ".login"], { on: this.repoOn }).catch(() => null);
           if (r?.code === 0) { this.logins[id] = r.stdout.trim(); remember("logins", id, this.logins[id]); }
+          else if (!r) ghNotice("Cannot run gh");
+          else ghNotice((r.stderr || "gh could not read your GitHub login").trim());
         }
         this.me = this.logins[id];
       }
@@ -200,6 +206,8 @@ export default class Issues extends View {
       else cx.spawn(async (cx) => {
         const r = await exec("gh", ["api", "user", "-q", ".login"], { on: this.repoOn }).catch(() => null);
         if (r?.code === 0) { this.me = this.logins[id] = r.stdout.trim(); remember("logins", id, this.me); cx.notify(); }
+        else if (!r) ghNotice("Cannot run gh");
+        else ghNotice((r.stderr || "gh could not read your GitHub login").trim());
       });
       return this.load(cx);
     }

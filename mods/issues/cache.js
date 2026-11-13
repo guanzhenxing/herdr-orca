@@ -1,11 +1,24 @@
 // Disk cache for GitHub answers, under data/issues/cache/, shared by every popup copy
 // and kept across restarts, so reopening something doesn't spend rate limit again.
 import * as fs from "fs/promises";
-import { appHome, exec } from "herdr";
+import { appHome, exec, notify } from "herdr";
 
 const dir = () => `${appHome()}/data/issues/cache`;
 const hash = (s) => [...s].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 2166136261).toString(16);
 const file = (key) => `${dir()}/${key.replace(/[^\w.-]+/g, "_").slice(0, 120)}-${hash(key)}.json`;
+
+// gh missing or not logged in looks like an empty app: no repos are found, lists stay
+// empty and nothing says why. One heads-up per run, never per probe or per render.
+let ghNoticeShown = false;
+export function ghNotice(detail) {
+  if (ghNoticeShown) return;
+  ghNoticeShown = true;
+  notify({
+    title: "Issues: GitHub unavailable",
+    body: `${detail || "gh did not answer"}. Lists stay empty until gh is installed and gh auth login has run.`,
+    level: "warning",
+  });
+}
 
 export async function readCache(key) {
   try { return JSON.parse(await fs.readFile(file(key), "utf8")); } catch { return null; }

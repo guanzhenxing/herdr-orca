@@ -1,6 +1,6 @@
 // Read-only PR discovery for each [machine, checkout]. This observer is separate
 // from space rendering so frequent redraws never launch Git or GitHub commands.
-import { exec, appHome } from "herdr";
+import { exec, appHome, notify } from "herdr";
 import * as fs from "fs/promises";
 
 // The last status, ETags and check times survive restarts, so a reopened app shows the
@@ -12,6 +12,19 @@ const MIN = 60000;
 const ISSUE_TTL = 10 * MIN;
 const HOVER_MIN_MS = 20000; // a hovered row asks GitHub again at most this often
 const PENDING = /PENDING|QUEUED|IN_PROGRESS|EXPECTED|WAITING|REQUESTED/i;
+
+// gh missing or not logged in just hides every badge, which looks like "no PRs".
+// One heads-up per run, so the cause is discoverable; never per poll or per render.
+let ghNoticeShown = false;
+function ghNotice(detail) {
+  if (ghNoticeShown) return;
+  ghNoticeShown = true;
+  notify({
+    title: "orca-sidebar: GitHub unavailable",
+    body: `${detail || "gh did not answer"}. Issue and PR badges stay hidden until gh is installed and gh auth login has run.`,
+    level: "warning",
+  });
+}
 
 // How long a branch's PR status may stand without a repo change: CI finishing doesn't
 // change the PR on GitHub, so running checks are rechecked often; settled ones rarely.
@@ -303,9 +316,16 @@ export class PRStatusObserver {
     const key = JSON.stringify(args);
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.at < maxAge) return cached.data;
-    const result = await exec("gh", args);
-    if (result.code !== 0)
+    // Herdr's exec takes a command name and an argument array (no shell), so the
+    // arguments can never form a command line; failures say why once.
+    const result = await exec("gh", args).catch((e) => {
+      ghNotice(`Cannot run gh (${String(e).trim()})`);
+      throw new Error("gh is not available");
+    });
+    if (result.code !== 0) {
+      ghNotice((result.stderr || "GitHub answered with an error").trim());
       throw new Error((result.stderr || "GitHub unavailable; check gh auth login").trim());
+    }
     const data = JSON.parse(result.stdout);
     this.cache.set(key, { at: Date.now(), data });
     return data;
