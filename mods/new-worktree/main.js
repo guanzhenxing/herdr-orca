@@ -376,11 +376,13 @@ export default class NewWorktree extends View {
   }
 
   // The issues mod's helper pastes the task into Claude's prompt once it's ready, without sending it.
-  // It watches this computer's terminals only and needs sh, so a remote space, or any space of a
-  // Windows app, gets the task on the clipboard (the app's own, so it works where pbcopy doesn't).
+  // It watches this computer's terminals only and needs macOS's pbcopy, so a remote space, or any
+  // space of a Linux or Windows app, gets the task on the clipboard (the app's own, so it works
+  // everywhere pbcopy doesn't). Herdr's exec passes a script path and one task argument as an
+  // argument array to sh — the task is never placed on a shell command line.
   async prefill(task, cx) {
     const platform = window()?.platform;
-    if (!this.on && platform !== "windows") {
+    if (!this.on && platform === "macos") {
       await exec("sh", ["-c", 'nohup sh "$0" "$@" >/dev/null 2>&1 &', `${appHome()}/mods/issues/prefill.sh`, task]).catch(() => null);
       return;
     }

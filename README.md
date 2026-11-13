@@ -49,8 +49,9 @@ layout is shown, so it never shadows the keys of your other layouts.
 
 Needs `git` and a logged-in `gh`. Usage limits read the `claude` and `codex` CLIs; Automations uses
 the `herdr-automations` CLI; desktop notifications use `terminal-notifier` when installed. Built and
-tested on macOS with Herdr 0.1.15 — macOS first: Linux misses the issue prefill's `pbcopy`/`pbpaste`,
-and Windows has no sleep for spaces (the hibernate mod warns at runtime); the rest follows the same
+tested on macOS with Herdr 0.1.15 — macOS first: on Linux and Windows the issue prefill puts the
+task on the clipboard instead of typing it (paste with Ctrl+Shift+V), and Windows has no sleep for
+spaces (the hibernate mod warns at runtime); the rest follows the same
 paths. See "What this runs" below for everything the mods execute and reach.
 
 ## What this runs

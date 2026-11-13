@@ -1,6 +1,8 @@
 #!/bin/sh
 # Pastes an issue task into the Claude the worktree dialog starts, without pressing Enter.
 # Started detached by main.js: prefill.sh <task>. Gives up after 10 minutes (dialog cancelled).
+# macOS only (pbcopy/pbpaste); callers decide the clipboard fallback elsewhere.
+command -v pbcopy >/dev/null 2>&1 || exit 1
 task=$1
 end=$(( $(date +%s) + 600 ))
 since=$(( ($(date +%s) - 2) * 1000 ))

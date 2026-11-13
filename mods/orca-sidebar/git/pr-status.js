@@ -1,6 +1,6 @@
 // Read-only PR discovery for each [machine, checkout]. This observer is separate
 // from space rendering so frequent redraws never launch Git or GitHub commands.
-import { exec, appHome, notify } from "herdr";
+import { exec, appHome, notify, shared, setShared } from "herdr";
 import * as fs from "fs/promises";
 
 // The last status, ETags and check times survive restarts, so a reopened app shows the
@@ -14,11 +14,14 @@ const HOVER_MIN_MS = 20000; // a hovered row asks GitHub again at most this ofte
 const PENDING = /PENDING|QUEUED|IN_PROGRESS|EXPECTED|WAITING|REQUESTED/i;
 
 // gh missing or not logged in just hides every badge, which looks like "no PRs".
-// One heads-up per run, so the cause is discoverable; never per poll or per render.
+// One heads-up per run, shared with the issues mod through shared state, so the two
+// mods don't each speak; it can re-say once an hour. Never per poll or per render.
 let ghNoticeShown = false;
 function ghNotice(detail) {
   if (ghNoticeShown) return;
+  if (Date.now() - (shared("github.unavailable.at") ?? 0) < 3600000) return;
   ghNoticeShown = true;
+  setShared("github.unavailable.at", Date.now());
   notify({
     title: "orca-sidebar: GitHub unavailable",
     body: `${detail || "gh did not answer"}. Issue and PR badges stay hidden until gh is installed and gh auth login has run.`,
