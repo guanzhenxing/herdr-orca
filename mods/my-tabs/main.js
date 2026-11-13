@@ -149,8 +149,10 @@ export default class Tabs extends View {
     return h_flex().size_full().min_w(0).px(10).pl(lightsPadding).gap(3).items_center().bg(t.chrome).border_b(1).border_color(t.border)
       .on_mouse_up("left", () => { this.pressed = null; })
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
-      .when(Boolean(sidebar), el => el.child(button("sidebar-toggle", svg("mods/workspace-chrome/sidebar.svg").size(15), () => run("layout.toggle", { id: "sidebar" }))
-        .tooltip(sidebar.hidden ? "Show sidebar" : "Hide sidebar")))
+      // One toggle at a time: while the sidebar shows, the brand button covers it;
+      // this one appears only once the sidebar is hidden, so a way back is always visible.
+      .when(Boolean(sidebar?.hidden), el => el.child(button("sidebar-toggle", svg("mods/workspace-chrome/sidebar.svg").size(15), () => run("layout.show", { id: "sidebar" }))
+        .tooltip("Show sidebar")))
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item)))
       .child(button("tab-new", "+", () => openOverlay({ mod: "my-new-menu", kind: "popup", width: 250, height: 543 })))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/files/file.svg")))
