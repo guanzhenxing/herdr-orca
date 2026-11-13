@@ -26,6 +26,11 @@ doesn't include:
 >
 > Add this mod: https://github.com/munza/herdr-mods/tree/main/better-config
 
+Or, from a clone of this repo, one command: `sh install.sh` (`--yes` overwrites mods and the
+layout you already have, `--dry-run` looks first). It merges `keys.json` — bindings you use keep
+their actions — keeps Mod settings where a `mod.schema.json` describes them, runs `herdr-app check`
+on everything it installs, and never touches mods it doesn't ship.
+
 By hand:
 
 1. Copy `layouts/orca.json` into `~/.config/herdr-app/layouts/` and each folder in `mods/` into
