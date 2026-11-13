@@ -20,7 +20,7 @@ export function setNote(s, text) {
 }
 
 export const openNote = (s) =>
-  openOverlay({ mod: "better-sidebar", kind: "dialog", width: 460, height: 290, props: { view: "note", space: s.id } });
+  openOverlay({ mod: "orca-sidebar", kind: "dialog", width: 460, height: 290, props: { view: "note", space: s.id } });
 
 export class Note {
   init(_props, cx) {

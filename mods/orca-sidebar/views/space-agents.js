@@ -7,7 +7,7 @@ import { TEXT, Icon } from "./ui.js";
 import { RANK, kidStatus, duration, icon, agentLabel, statusMark } from "./agents.js";
 
 // Spaces drawing agents inline; the footer and the spaces header read and set it.
-export const INLINE_KEY = "better-sidebar.inline-agents";
+export const INLINE_KEY = "orca-sidebar.inline-agents";
 export const inlineAgents = () => shared(INLINE_KEY) ?? true;
 
 const urgent = (statuses) => statuses.reduce((m, s) => ((RANK[s] ?? 0) > (RANK[m] ?? 0) ? s : m), null);

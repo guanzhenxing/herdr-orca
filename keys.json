@@ -1,20 +1,20 @@
 {
   "global": {
-    "cmd-n": "mod.open:new-worktree",
     "cmd-g": "mod.open:open-vscode",
     "cmd-shift-e": "mod.open:excalidraw",
-    "cmd-shift-n": "mod.open:new-project"
+    "cmd-shift-n": "mod.open:new-project",
+    "cmd-alt-n": "mod.open:new-worktree"
   },
   "terminal": {
     "cmd-shift-e": "mod.open:excalidraw"
   },
   "layout:orca": {
     "cmd-shift-a": "layout.toggle:agents",
-    "cmd-shift-b": "better-sidebar.toggle-panel",
-    "cmd-alt-]": "better-sidebar.next-space",
-    "cmd-alt-[": "better-sidebar.prev-space",
-    "cmd-]": "better-sidebar.next-agent",
-    "cmd-[": "better-sidebar.prev-agent",
+    "cmd-shift-b": "orca-sidebar.toggle-panel",
+    "cmd-alt-]": "orca-sidebar.next-space",
+    "cmd-alt-[": "orca-sidebar.prev-space",
+    "cmd-]": "orca-sidebar.next-agent",
+    "cmd-[": "orca-sidebar.prev-agent",
     "cmd-w": "my-tabs.close-tab",
     "cmd-shift-w": "my-tabs.close-pane"
   }

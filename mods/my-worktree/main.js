@@ -5,7 +5,7 @@ import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, Scrollbar } from "gpui-base";
 import { run, props, closeOverlay, theme, spaces, panes, exec, home, shared, setShared } from "herdr";
 
-// better-sidebar's worktree notes (views/notes.js), by the same key: removing a worktree can take its note.
+// orca-sidebar's worktree notes (views/notes.js), by the same key: removing a worktree can take its note.
 const NOTES = "worktree.notes";
 const noteKey = (s) => JSON.stringify([s.machine ?? null, s.folder ?? s.id]);
 

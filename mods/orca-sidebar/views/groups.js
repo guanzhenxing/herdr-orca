@@ -5,7 +5,7 @@ import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { props, theme, shared, setShared, closeOverlay, openOverlay, spaces, notify } from "herdr";
 import { TEXT, SIZE, RADIUS, Icon } from "./ui.js";
 
-const KEY = "better-sidebar.groups";
+const KEY = "orca-sidebar.groups";
 
 // { groups: [{ id, name, color, home }], projects: { <unit key>: <group id> }, folds: { "<machine>|<id>": bool } }
 // A unit key is a repo's `[machine, git common dir]`, or `space:<id>` for a space outside any repo.
@@ -87,11 +87,11 @@ export function deleteGroup(id) {
 }
 
 const popup = (mode, extra, height = 220) =>
-  openOverlay({ mod: "better-sidebar", kind: "popup", width: 260, height, props: { view: "groups", mode, ...extra } });
+  openOverlay({ mod: "orca-sidebar", kind: "popup", width: 260, height, props: { view: "groups", mode, ...extra } });
 
 // Names a new folder (made on machine `home`), or renames `group`.
 export const openNameDialog = (group = null, home = null) =>
-  openOverlay({ mod: "better-sidebar", kind: "dialog", width: 380, height: 150, props: { view: "groups", mode: "name", group, home } });
+  openOverlay({ mod: "orca-sidebar", kind: "dialog", width: 380, height: 150, props: { view: "groups", mode: "name", group, home } });
 // `projects`: [{ key, name }] known to the spaces list now.
 export const openProjectPicker = (group, projects) =>
   popup("projects", { group, projects }, Math.min(420, 70 + projects.length * SIZE.menu));
