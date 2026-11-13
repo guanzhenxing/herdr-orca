@@ -26,6 +26,8 @@ Modified files:
 - `views/find-node.js`: `hasSpacesView`.
 - `views/ui.js`: exports `RADIUS`.
 - `views/footer.js`: adapted to this layout; "N agents · N need you" while agents show in spaces.
+  Its old Agents-panel toggle button is gone: it ignored the inline state and could show agents
+  twice (panel open while inline) or hide both; the header's Agents switch is the single toggle.
 - `views/agents.js`: sets agent order only when the layout has no spaces list; exports its helpers (status mark, icon, labels, durations) for the spaces list;
   a sub-agent kept as a pane shows only nested under its parent (not also
   as its own row), and clicking it focuses its pane instead of peeking.

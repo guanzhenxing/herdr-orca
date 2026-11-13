@@ -30,7 +30,8 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     depth). The header's **Agents** switch (bot icon) turns this on, the default.
   - **Agents** panel (`orca-sidebar`, `view: agents`): hidden while agents show in spaces; the
     Agents switch off brings it back. A footer (`view: footer`): Settings, "3 agents · 2 need you"
-    while agents show in spaces, the Agents panel toggle, Add machine.
+    while agents show in spaces, Add machine — no toggle of its own; the header's Agents switch is
+    the only agents on/off.
   - A space put to sleep shows a moon and **Asleep** on its second line.
 - **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
   shows, Herdr's brand button covers the hiding, so exactly one toggle is on screen at a time; a
