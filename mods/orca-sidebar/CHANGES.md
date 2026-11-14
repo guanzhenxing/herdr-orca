@@ -47,6 +47,10 @@ Modified files:
   is missing or not logged in, one notification says GitHub is unavailable (once per run, deduped
   with the issues mod through shared state) instead of every badge failing silently. Repo probes
   run in parallel, so a multi-repo round takes the slowest single call, not their sum.
+- `git/checkouts.js`: "not a git repository" is matched in the person's language (English and
+  中文 at least) — a Chinese-localized git used to make every non-repo folder look like a read
+  failure, re-probing it forever instead of caching it as null. `git/checkouts.check.cjs` (added)
+  pins the porcelain parse, folder resolution and both messages.
 - `mod.json`: settings for this layout.
 
 Added files: `views/card.js`, `views/groups.js`, `views/space-agents.js`, `views/space-nav.js`, `views/list-tabs.js`, `git/project-icons.js`, and icons

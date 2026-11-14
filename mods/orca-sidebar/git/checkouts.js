@@ -24,7 +24,10 @@ export async function readCheckout(cwd, on) {
     { cwd, on },
   );
   if (status.code !== 0) {
-    if (/not a git repository/i.test(status.stderr)) return null;
+    // "Not a repository" is git's message in the person's language (fatal: not a git
+    // repository / 不是 Git 仓库 / n'est pas un dépôt git…): match the common ones, or a
+    // non-repo would be re-probed forever instead of cached as null.
+    if (/not a git repository|不是\s*git 仓库|n'est pas un (dépôt|repositorio) git|kein git-repository/i.test(status.stderr)) return null;
     throw new Error("Cannot read status");
   }
 
