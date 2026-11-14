@@ -22,8 +22,11 @@ export class Footer {
       .when(!collapsed, (el) => el.child(div().child(label)));
     return v_flex().id("sidebar-footer").size_full().bg(t.chrome).border_t(1).border_color(t.border).px(8).pt(4).pb(8).text_size(13)
       .child(h_flex().items_center()
-        .child(row("settings", "settings", "Settings", false, () => run("app.settings")).flex_1().min_w(0)
+        // The row hugs its label: a full-width target swallowed the Mod settings
+        // button beside it and read as one very wide button.
+        .child(row("settings", "settings", "Settings", false, () => run("app.settings"))
           .when(Boolean(updates().app.ready), (el) => el.child(div().size(6).rounded_full().bg(t.accent))))
+        .child(div().flex_1())
         // Mod settings (Better Config) lives beside Settings now, not in the nav above.
         .child(IconButton({
           id: "mod-settings",
