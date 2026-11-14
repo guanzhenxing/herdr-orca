@@ -115,6 +115,49 @@ elif [ "$keys_changed" = 1 ]; then
   cp "$merged" "$HOME_DIR/keys.json"
 fi
 
+# The Automations panel needs the herdr-automations CLI. Build it from the vendored
+# source when Go is here; otherwise download the pinned release and verify its
+# checksum. Already-installed copies (PATH or ~/.local/bin) are left alone.
+if command -v herdr-automations >/dev/null 2>&1 || [ -x "$HOME/.local/bin/herdr-automations" ]; then
+  echo "herdr-automations CLI: already installed"
+else
+  cli_bin="$HOME/.local/bin/herdr-automations"
+  tag="v0.12.1"
+  if command -v go >/dev/null 2>&1; then
+    echo "herdr-automations CLI: building from vendored source (cli/herdr-automations)"
+    (cd cli/herdr-automations && go build -o "$cli_bin" .) || echo "  go build failed — the Automations panel will say so until it is installed."
+  else
+    case "$(uname -sm)" in
+      Darwin\ arm64) asset="darwin_arm64" ;;
+      Darwin\ x86_64) asset="darwin_amd64" ;;
+      Linux\ x86_64) asset="linux_amd64" ;;
+      Linux\ aarch64) asset="linux_arm64" ;;
+      *) asset="" ;;
+    esac
+    if [ -z "$asset" ]; then
+      echo "herdr-automations CLI: no release binary for $(uname -sm); install Go and rerun, or build cli/herdr-automations."
+    else
+      rel="https://github.com/DnzzL/herdr-automations/releases/download/$tag"
+      tmp=$(mktemp -d)
+      if curl -fsSL -o "$tmp/herdr-automations_$asset" "$rel/herdr-automations_$asset" \
+         && curl -fsSL -o "$tmp/checksums.txt" "$rel/checksums.txt"; then
+        if command -v shasum >/dev/null 2>&1; then
+          grep "herdr-automations_$asset" "$tmp/checksums.txt" | shasum -a 256 -c -
+        elif command -v sha256sum >/dev/null 2>&1; then
+          grep "herdr-automations_$asset" "$tmp/checksums.txt" | sha256sum -c -
+        else
+          echo "herdr-automations CLI: no sha256 tool found; refusing to install an unverified binary."
+        fi
+        [ $? = 0 ] && mkdir -p "$HOME/.local/bin" && install -m 755 "$tmp/herdr-automations_$asset" "$cli_bin" \
+          && echo "herdr-automations CLI: installed $tag to $cli_bin"
+      else
+        echo "herdr-automations CLI: download failed ($rel) — the Automations panel will say so until it is installed."
+      fi
+      rm -rf "$tmp"
+    fi
+  fi
+fi
+
 check_failed=""
 if command -v herdr-app >/dev/null 2>&1; then
   for name in $install_mods; do

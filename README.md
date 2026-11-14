@@ -48,7 +48,8 @@ dialog opens with `cmd-alt-n` instead. Everything in `keys.json`'s `layout:orca`
 layout is shown, so it never shadows the keys of your other layouts.
 
 Needs `git` and a logged-in `gh`. Usage limits read the `claude` and `codex` CLIs; Automations uses
-the `herdr-automations` CLI; desktop notifications use `terminal-notifier` when installed. Built and
+the bundled `herdr-automations` CLI (installed by `install.sh`; the panel says so if it is missing);
+desktop notifications use `terminal-notifier` when installed. Built and
 tested on macOS with Herdr 0.1.15 — macOS first: on Linux and Windows the issue prefill puts the
 task on the clipboard instead of typing it (paste with Ctrl+Shift+V), and Windows has no sleep for
 spaces (the hibernate mod warns at runtime); the rest follows the same
@@ -64,7 +65,11 @@ installing:
   (the resource meter), `curl` (Network below), `open` / `xdg-open` / `powershell` / `code` (open a
   file, folder or link), `sips` / `convert` (project icons), `osascript` / `terminal-notifier` /
   `notify-send` (desktop notifications), `pbcopy` / `pbpaste` (issue prefill), `printenv` (a remote
-  machine's home folder), `herdr-automations` (Automations), `hc` (Herdr's own CLI), and small `sh`
+  machine's home folder), `herdr-automations` (Automations: scheduled prompts — its Start banner
+  installs a per-user scheduler service, a LaunchAgent via `launchctl` on macOS or a systemd user
+  unit on Linux; data in `~/.config/herdr/plugins/config/dnzzl.automations/` and
+  `~/.local/state/herdr/plugins/dnzzl.automations/`; vendored in `cli/herdr-automations/`),
+  `hc` (Herdr's own CLI), and small `sh`
   scripts with the usual tools (`grep`, `sed`, `awk`, `jq`, `mkdir`, `find`, `cp`, `rm`, `date`,
   `sleep`). Usage limits ask the `claude` and `codex` CLIs: the CLIs authenticate themselves, and
   nothing here sees their tokens.

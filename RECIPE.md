@@ -162,7 +162,9 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
   light and dark), Terminal (the theme's ANSI colors) or Off. `.env`, `.env.*`, `*.env` and `.envrc`
   highlight as shell.
 - **Changes**: staging, commit/amend, history, diffs in one centre tab (Better Changes' own docs).
-- **Automations**: scheduled agent prompts, through the `herdr-automations` CLI.
+- **Automations**: scheduled agent prompts, through the `herdr-automations` CLI — vendored in
+  `cli/herdr-automations/` (MIT, see its `VENDOR.md`); `install.sh` builds or downloads it, and the
+  panel's Start banner installs a per-user scheduler service.
 - Keys (merge `keys.json`): `cmd-n` new worktree, `cmd-shift-n` add project, `cmd-g` VS Code,
   `cmd-shift-e` Excalidraw; in this layout `cmd-shift-a` flips the sidebar's Spaces/Agents tabs, `cmd-shift-b` the right
   panel, `cmd-alt-]` / `cmd-alt-[` next / previous space, `cmd-]` / `cmd-[` next / previous agent, `cmd-w` / `cmd-shift-w` close a tab / pane. Closing a tab by key asks first ("Close tab

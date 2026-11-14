@@ -67,7 +67,16 @@ export default class Automations extends View {
   }
 
   async cli(args) {
-    const r = await exec(this.bin, args);
+    // Herdr's exec is argv-based (command name + argument array, no shell), so args
+    // can never form a command line. A missing binary used to surface as a raw
+    // fork/exec error; give it a usable message instead.
+    let r;
+    try { r = await exec(this.bin, args); }
+    catch (e) {
+      if (/cannot run|No such file or directory/i.test(String(e)))
+        throw new Error("herdr-automations CLI is missing. Install it with install.sh (builds cli/herdr-automations), or with Go: go build -o ~/.local/bin/herdr-automations cli/herdr-automations.");
+      throw e;
+    }
     if (r.code !== 0) throw new Error((r.stderr || r.stdout).trim().replace(/^error: /, ""));
     return r.stdout;
   }
