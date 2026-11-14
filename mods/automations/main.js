@@ -51,11 +51,11 @@ export default class Automations extends View {
     this.view = { kind: "list" }; // list | detail {name} | form {original}
     this.error = null; this.note = null;
     this.known = null; // run ids already seen by this copy, to toast only new failures
+    this.watching = new Set(); // dirs a watcher is already running for
     this.handle = cx.focus_handle();
     cx.spawn(async (cx) => {
       this.bin = await this.locate();
       await this.refresh(cx);
-      this.watch(cx);
     });
     cx.timer.every(30000, (cx) => this.refresh(cx)); // next-run times and the scheduler's pid
   }
@@ -89,15 +89,33 @@ export default class Automations extends View {
       this.error = null;
       this.announce();
     } catch (e) { this.error = String(e.message ?? e); }
+    this.watch(cx); // new paths (first run, install) arm their watcher here
     cx.notify();
   }
 
-  // Config and state folders: a change there is a change to show.
+  // Config and state folders: a change there is a change to show. Watchers re-arm
+  // from refresh as the paths become known (a fresh install has no config yet), and
+  // a failed watch backs off and retries instead of dying: the CLI creates the
+  // folder only when the first automation exists.
   watch(cx) {
     const dirs = [this.list?.config?.replace(/\/[^/]+$/, ""), this.list?.state].filter(Boolean);
-    for (const dir of dirs) cx.spawn(async (cx) => {
-      for (;;) { try { await watchFolder(dir); } catch { return; } await this.refresh(cx); }
-    });
+    for (const dir of dirs) {
+      if (this.watching.has(dir)) continue;
+      this.watching.add(dir);
+      cx.spawn(async (cx) => {
+        let wait = 1000;
+        for (;;) {
+          try {
+            await watchFolder(dir);
+            wait = 1000;
+          } catch {
+            await cx.sleep(wait);
+            wait = Math.min(wait * 2, 60000);
+          }
+          await this.refresh(cx);
+        }
+      });
+    }
   }
 
   // A failure finds you (ADR 0007): toast runs that failed or were missed
