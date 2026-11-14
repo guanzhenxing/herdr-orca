@@ -388,8 +388,6 @@ export class Agents {
       .size_full()
       .min_h(0)
       .bg(t.chrome)
-      .border_t(1)
-      .border_color(t.border)
       .text_size(TEXT.body)
       // In the rail the heading drops away, so the tab bar is this view's only header
       // there — and the only way to leave this tab.
@@ -548,7 +546,7 @@ export class Agents {
       count: group.members.length,
       labelColor: t[group.status],
       folded,
-      divided: index > 0,
+      // No rule between groups: the Spaces list separates its sections the same way.
       action: showTop ? this.status(t, { status: top }, true) : null,
       onClick: (cx) => this.toggleFold(group.id, cx),
     });

@@ -6,6 +6,7 @@ import { div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { theme, run, updates, layout } from "herdr";
 import { findNode } from "./find-node.js";
+import { IconButton } from "./ui.js";
 import { inlineAgents, readAgents, tally, subTree, allSpaceIds } from "./space-agents.js";
 import { kidStatus } from "./agents.js";
 
@@ -23,6 +24,15 @@ export class Footer {
       .child(h_flex().items_center()
         .child(row("settings", "settings", "Settings", false, () => run("app.settings")).flex_1().min_w(0)
           .when(Boolean(updates().app.ready), (el) => el.child(div().size(6).rounded_full().bg(t.accent))))
+        // Mod settings (Better Config) lives beside Settings now, not in the nav above.
+        .child(IconButton({
+          id: "mod-settings",
+          icon: "sliders",
+          label: "Mod settings",
+          iconSize: 14,
+          muted: true,
+          onClick: () => run("mod.open", { name: "better-config" }),
+        }))
         .when(inlineAgents() && !collapsed, (el) => el.child(this.summary(t))))
       .child(row("machine", "plus", "Add machine", true, () => run("mod.open", { name: "machine-add" })));
   }

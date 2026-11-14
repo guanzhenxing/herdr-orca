@@ -25,7 +25,7 @@
               "id": "sidebar-nav",
               "type": "block",
               "size": {
-                "px": 101
+                "px": 70
               },
               "content": {
                 "mod": "sidebar-nav"

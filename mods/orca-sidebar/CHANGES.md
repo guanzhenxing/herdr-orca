@@ -33,9 +33,12 @@ Modified files:
 - `views/ui.js`: exports `RADIUS`.
 - `views/footer.js`: adapted to this layout; "N agents · N need you" while agents show in spaces.
   Its old Agents-panel toggle button is gone: it ignored the inline state and could show agents
-  twice (panel open while inline) or hide both; the tab bar is the single switch.
+  twice (panel open while inline) or hide both; the tab bar is the single switch. A **Mod settings**
+  button (sliders icon, opens munza's `better-config`) sits beside Settings — moved out of the
+  sidebar-nav links above.
 - `views/agents.js`: sets agent order only when the layout has no spaces list; exports its helpers (status mark, icon, labels, durations) for the spaces list;
   its header is the Spaces/Agents tab bar plus the sort menu (in the rail, the icon tab bar alone);
+  no rule above groups and no top border — the Spaces tab draws neither, so the tabs match;
   a sub-agent kept as a pane shows only nested under its parent (not also
   as its own row), and clicking it focuses its pane instead of peeking.
 - `git/pr-status.js`: finds each checkout's issue (git-config link, PR closing references,
@@ -46,4 +49,4 @@ Modified files:
 
 Added files: `views/card.js`, `views/groups.js`, `views/space-agents.js`, `views/space-nav.js`, `views/list-tabs.js`, `git/project-icons.js`, and icons
 (`bot`, `moon`, `copy`, `ellipsis`, `external`, `folder`, `folder-plus`, `github`, `issue`, `issue-closed`,
-`panel-bottom`, `plug`). Removed: `mod.schema.json`, `icons/sliders.svg`.
+`panel-bottom`, `plug`, `sliders`). Removed: `mod.schema.json`, `icons/sliders.svg`.

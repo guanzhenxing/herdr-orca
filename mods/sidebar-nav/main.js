@@ -7,7 +7,6 @@ import { theme, run } from "herdr";
 const LINKS = [
   ["automations", "Automations", "mods/sidebar-nav/automations.svg"],
   ["issues", "Issues", "mods/sidebar-nav/issues.svg"],
-  ["better-config", "Mod settings", "mods/sidebar-nav/settings.svg"],
 ];
 
 export default class SidebarNav extends View {

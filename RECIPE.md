@@ -16,8 +16,8 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
 
 - **Sidebar** (268px, 44–480, foldable with `cmd-b`):
   - `brand` (46px): Herdr's `workspace-chrome` brand row.
-  - `sidebar-nav` (101px): Orca-style links, **Automations**, **Issues** and **Mod settings**, each
-    opening its mod as a popup (`automations`, `issues`, munza's `better-config`).
+  - `sidebar-nav` (70px): Orca-style links, **Automations** and **Issues**, each
+    opening its mod as a popup (`automations`, `issues`).
   - **Spaces** (`orca-sidebar`): one section per machine (a 30px bar: chevron, monitor or
     server icon, bold name, a green dot while connected, **+**; a 1px rule above every machine but
     the first), and inside it your **folders** (tinted blocks: chevron, colored folder icon, name,
@@ -32,7 +32,9 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     full height — **Spaces | Agents** in a segmented tab bar each view draws in its own header
     (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
     header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
-    main space, prefix). A footer (`view: footer`): Settings, "3 agents · 2 need you", Add machine.
+    main space, prefix); groups separate by their headers alone, like the Spaces list's sections.
+    A footer (`view: footer`): Settings, a **Mod settings** button (munza's `better-config`),
+    "3 agents · 2 need you", Add machine.
   - A space put to sleep shows a moon and **Asleep** on its second line.
 - **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
   shows, Herdr's brand button covers the hiding, so exactly one toggle is on screen at a time; a

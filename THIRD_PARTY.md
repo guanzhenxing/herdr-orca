@@ -13,7 +13,7 @@ munza/herdr-mods' license and NOTICE are kept, unmodified, in `licenses/`.
 
 **Not included, install from their authors:** the layout's Changes panel uses
 [Better Changes](https://github.com/munza/herdr-mods/tree/main/better-changes) and the sidebar's
-"Mod settings" link opens [Better Config](https://github.com/munza/herdr-mods/tree/main/better-config),
+"Mod settings" button (in the footer, beside Settings) opens [Better Config](https://github.com/munza/herdr-mods/tree/main/better-config),
 both by Tawsif Aqib (munza). See the README.
 
 Lucide icons (ISC) appear throughout, as in Herdr's own mods.
