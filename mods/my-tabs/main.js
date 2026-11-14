@@ -153,8 +153,10 @@ export default class Tabs extends View {
       // this one appears only once the sidebar is hidden, so a way back is always visible.
       .when(Boolean(sidebar?.hidden), el => el.child(button("sidebar-toggle", svg("mods/workspace-chrome/sidebar.svg").size(15), () => run("layout.show", { id: "sidebar" }))
         .tooltip("Show sidebar")))
-      .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar().children(shown.map(item)))
-      .child(button("tab-new", "+", () => openOverlay({ mod: "my-new-menu", kind: "popup", width: 250, height: 543 })))
+      // The + lives inside the scroll area, right after the last tab (browser-style);
+      // the Files / Changes buttons keep the row's right edge.
+      .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar()
+        .children([...shown.map(item), button("tab-new", "+", () => openOverlay({ mod: "my-new-menu", kind: "popup", width: 250, height: 543 }))]))
       .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/files/file.svg")))
       .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/changes/changes.svg")))
       .child(h_flex().id("excalidraw").h(26).px(8).gap(5).flex_none().items_center().rounded(6).text_size(12).text_color(t.muted)
