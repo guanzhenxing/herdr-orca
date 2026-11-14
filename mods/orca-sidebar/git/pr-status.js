@@ -102,22 +102,25 @@ export class PRStatusObserver {
   }
 
   // Did anything in these repositories change on GitHub? One conditional request per repo
-  // a minute, shared by every space on it; a 304 (unchanged) costs no rate limit.
+  // a minute, shared by every space on it; a 304 (unchanged) costs no rate limit. Probes
+  // run in parallel — a checkout list can span several repos, and the round is bounded by
+  // the slowest single call, not their sum.
   async repoChanged(repositories) {
-    let changed = false;
-    for (const repo of repositories) {
-      const seen = this.probes.get(repo);
-      if (seen && Date.now() - seen.at < PR_POLL_MS - 5000) { changed ||= seen.changed; continue; }
-      const args = ["api", "-i", `repos/${repo}/issues?state=all&sort=updated&direction=desc&per_page=1`];
-      if (seen?.etag) args.splice(2, 0, "-H", `If-None-Match: ${seen.etag}`);
-      const r = await exec("gh", args).catch(() => null);
-      const out = r?.stdout ?? "";
-      const same = Boolean(seen?.etag) && /^HTTP\/[\d.]+ 304/m.test(out);
-      const etag = same ? seen.etag : (/^etag:\s*(.+?)\s*$/im.exec(out)?.[1] ?? null);
-      this.probes.set(repo, { at: Date.now(), etag, changed: !same });
-      changed ||= !same;
-    }
-    return changed;
+    const results = await Promise.all([...repositories].map((repo) => this.probeRepo(repo)));
+    return results.some((changed) => changed);
+  }
+
+  async probeRepo(repo) {
+    const seen = this.probes.get(repo);
+    if (seen && Date.now() - seen.at < PR_POLL_MS - 5000) return seen.changed;
+    const args = ["api", "-i", `repos/${repo}/issues?state=all&sort=updated&direction=desc&per_page=1`];
+    if (seen?.etag) args.splice(2, 0, "-H", `If-None-Match: ${seen.etag}`);
+    const r = await exec("gh", args).catch(() => null);
+    const out = r?.stdout ?? "";
+    const same = Boolean(seen?.etag) && /^HTTP\/[\d.]+ 304/m.test(out);
+    const etag = same ? seen.etag : (/^etag:\s*(.+?)\s*$/im.exec(out)?.[1] ?? null);
+    this.probes.set(repo, { at: Date.now(), etag, changed: !same });
+    return !same;
   }
 
   refresh(places, cx) {

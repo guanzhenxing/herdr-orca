@@ -45,7 +45,8 @@ Modified files:
 - `git/pr-status.js`: finds each checkout's issue (git-config link, PR closing references,
   "Closes #N", or a branch number checked against GitHub) and carries it with the PRs. When `gh`
   is missing or not logged in, one notification says GitHub is unavailable (once per run, deduped
-  with the issues mod through shared state) instead of every badge failing silently.
+  with the issues mod through shared state) instead of every badge failing silently. Repo probes
+  run in parallel, so a multi-repo round takes the slowest single call, not their sum.
 - `mod.json`: settings for this layout.
 
 Added files: `views/card.js`, `views/groups.js`, `views/space-agents.js`, `views/space-nav.js`, `views/list-tabs.js`, `git/project-icons.js`, and icons
