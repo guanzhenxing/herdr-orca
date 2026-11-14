@@ -33,10 +33,10 @@ Modified files:
 - `views/ui.js`: exports `RADIUS`.
 - `views/footer.js`: adapted to this layout; "N agents · N need you" while agents show in spaces.
   Its old Agents-panel toggle button is gone: it ignored the inline state and could show agents
-  twice (panel open while inline) or hide both; the tab bar is the single switch. A **Mod settings**
-  button (sliders icon, opens munza's `better-config`) sits beside Settings — moved out of the
-  sidebar-nav links above. The Settings row hugs its label instead of stretching (a tooltip on
-  the sliders button names it; the full-width target used to swallow its neighbours).
+  twice (panel open while inline) or hide both; the tab bar is the single switch. Settings and
+  **Mod settings** (sliders, opens munza's `better-config` — moved out of the sidebar-nav links)
+  are icon buttons together at the left, named by their tooltips; the agent count stays at the
+  right.
 - `views/agents.js`: sets agent order only when the layout has no spaces list; exports its helpers (status mark, icon, labels, durations) for the spaces list;
   its header is the Spaces/Agents tab bar plus the sort menu (in the rail, the icon tab bar alone);
   no rule above groups and no top border — the Spaces tab draws neither, so the tabs match;

@@ -33,8 +33,8 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
     header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
     main space, prefix); groups separate by their headers alone, like the Spaces list's sections.
-    A footer (`view: footer`): Settings, a **Mod settings** button (munza's `better-config`),
-    "3 agents · 2 need you", Add machine.
+    A footer (`view: footer`): **Settings** and **Mod settings** (munza's `better-config`) as
+    icon buttons at the left (tooltips name them), "3 agents · 2 need you" at the right, Add machine.
   - A space put to sleep shows a moon and **Asleep** on its second line.
 - **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
   shows, Herdr's brand button covers the hiding, so exactly one toggle is on screen at a time; a

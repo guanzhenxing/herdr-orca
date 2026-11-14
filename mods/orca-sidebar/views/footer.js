@@ -21,13 +21,19 @@ export class Footer {
       .on_click(action).child(svg(`mods/workspace-chrome/${icon}.svg`).size(14).flex_none())
       .when(!collapsed, (el) => el.child(div().child(label)));
     return v_flex().id("sidebar-footer").size_full().bg(t.chrome).border_t(1).border_color(t.border).px(8).pt(4).pb(8).text_size(13)
-      .child(h_flex().items_center()
-        // The row hugs its label: a full-width target swallowed the Mod settings
-        // button beside it and read as one very wide button.
-        .child(row("settings", "settings", "Settings", false, () => run("app.settings"))
-          .when(Boolean(updates().app.ready), (el) => el.child(div().size(6).rounded_full().bg(t.accent))))
-        .child(div().flex_1())
-        // Mod settings (Better Config) lives beside Settings now, not in the nav above.
+      .child(h_flex().gap(2).items_center()
+        // Two icon buttons on the left — Settings, then Mod settings (Better Config,
+        // which used to be a nav link above). Icon-only: their tooltips name them, and
+        // the accent dot flags a ready update beside the gear.
+        .child(IconButton({
+          id: "settings",
+          icon: "settings",
+          label: "Settings",
+          iconSize: 14,
+          muted: true,
+          onClick: () => run("app.settings"),
+        }))
+        .when(Boolean(updates().app.ready), (el) => el.child(div().size(6).rounded_full().bg(t.accent).flex_none()))
         .child(IconButton({
           id: "mod-settings",
           icon: "sliders",
@@ -36,6 +42,7 @@ export class Footer {
           muted: true,
           onClick: () => run("mod.open", { name: "better-config" }),
         }))
+        .child(div().flex_1())
         .when(inlineAgents() && !collapsed, (el) => el.child(this.summary(t))))
       .child(row("machine", "plus", "Add machine", true, () => run("mod.open", { name: "machine-add" })));
   }
