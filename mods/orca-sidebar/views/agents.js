@@ -20,6 +20,7 @@ import {
 } from "herdr";
 import { findNode, hasSpacesView } from "./find-node.js";
 import { TEXT, Icon, IconButton, GroupHeader, Menu, MenuLabel, MenuOption } from "./ui.js";
+import { ListTabs, activeListTab } from "./list-tabs.js";
 
 // The sidebar's rail goes by its width, not a flag: dragging its edge narrows it too.
 const narrow = () => (findNode(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
@@ -390,6 +391,9 @@ export class Agents {
       .border_t(1)
       .border_color(t.border)
       .text_size(TEXT.body)
+      // In the rail the heading drops away, so the tab bar is this view's only header
+      // there — and the only way to leave this tab.
+      .when(view.collapsed, (el) => el.child(ListTabs({ active: activeListTab(), collapsed: true })))
       .when(!view.collapsed, (el) => el.child(this.heading(view.sort, t)))
       .when(view.list.length === 0 && !view.collapsed, (el) => el.child(this.emptyMessage(t)))
       .child(
@@ -488,13 +492,11 @@ export class Agents {
   heading(sort, t) {
     return h_flex()
       .px(16)
-      .h(41)
-      .pt(14)
-      .pb(5)
+      .h(31)
       .flex_none()
       .items_center()
       .justify_between()
-      .child(div().text_size(TEXT.label).font_medium().text_color(t.dim).child("Agents"))
+      .child(ListTabs({ active: activeListTab(), collapsed: false }))
       .child(this.renderSortMenu(sort));
   }
 

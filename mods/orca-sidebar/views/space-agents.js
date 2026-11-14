@@ -2,11 +2,12 @@
 // sub-agents nested below on tree lines. Shares its look with views/agents.js.
 import { div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, terminals, focused, spaces, run, shared, setShared } from "herdr";
+import { agents, terminals, focused, spaces, run, shared } from "herdr";
 import { TEXT, Icon } from "./ui.js";
 import { RANK, kidStatus, duration, icon, agentLabel, statusMark } from "./agents.js";
 
-// Spaces drawing agents inline; the footer and the spaces header read and set it.
+// Spaces drawing agents inline; the footer's count reads it. Always on since the
+// Spaces/Agents tabs arrived (spaces.js migrates an old off value once).
 export const INLINE_KEY = "orca-sidebar.inline-agents";
 export const inlineAgents = () => shared(INLINE_KEY) ?? true;
 
@@ -244,12 +245,6 @@ export class SpaceAgents {
     if (l === "├") return col.child(through).child(elbow);
     return col.child(elbow);
   }
-}
-
-// Turns agents in spaces on or off; the Agents panel shows when they're off.
-export function setInlineAgents(on, layoutNode) {
-  setShared(INLINE_KEY, on);
-  if (layoutNode) run(on ? "layout.hide" : "layout.show", { id: layoutNode.id });
 }
 
 // Spaces' ids, for counting everything (the footer).

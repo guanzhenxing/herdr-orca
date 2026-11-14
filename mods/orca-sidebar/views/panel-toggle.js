@@ -1,5 +1,6 @@
 // The button that hides and shows the right panel, in its own small block beside
-// the tab bar, and the key command that does the same.
+// the tab bar, and the key commands that do the same — plus switching the sidebar's
+// Spaces/Agents tabs (cmd-shift-a) from outside the sidebar.
 import { h_flex } from "gpui-base";
 import { theme, run, props, layout, nextCommand } from "herdr";
 import { findNode } from "./find-node.js";
@@ -13,12 +14,19 @@ export class PanelToggle {
       for (;;) {
         const c = await nextCommand();
         if (c === "toggle-panel") this.toggle();
+        else if (c === "toggle-list") this.toggleList();
         else if (c === "next-space") stepSpace(1);
         else if (c === "prev-space") stepSpace(-1);
         else if (c === "next-agent") stepAgent(1);
         else if (c === "prev-agent") stepAgent(-1);
       }
     });
+  }
+
+  // Flip the sidebar's Spaces/Agents stack to its other tab.
+  toggleList() {
+    const stack = findNode(layout(), "sidebar-lists");
+    if (stack) run("layout.select", { stack: stack.id, child: stack.active === "agents" ? "spaces" : "agents" });
   }
 
   panel() {

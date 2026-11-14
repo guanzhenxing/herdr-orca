@@ -30,7 +30,8 @@ import { findNode } from "./find-node.js";
 import { TEXT, Icon, IconButton, Badge } from "./ui.js";
 import { HOVER_KEY, LIVE_KEY } from "./card.js";
 import { noteOf, openNote } from "./notes.js";
-import { SpaceAgents, inlineAgents, setInlineAgents } from "./space-agents.js";
+import { SpaceAgents, inlineAgents, INLINE_KEY } from "./space-agents.js";
+import { ListTabs, activeListTab } from "./list-tabs.js";
 import { ORDER_KEY } from "./space-nav.js";
 import { readGroups, groupTint, isFolded, setFold, toggleFold, fileUnder, newGroupWith, openNameDialog, openProjectPicker, openGroupMenu } from "./groups.js";
 
@@ -75,6 +76,9 @@ export class Spaces {
   // ── Lifecycle and refresh scheduling ──────────────────────────────────────
 
   init(_props, cx) {
+    // Tabs replaced the inline/panel switch: agents always draw in spaces now, so
+    // anyone left in panel mode by the old chip is carried over once.
+    if (!inlineAgents()) setShared(INLINE_KEY, true);
     this.prObserver = new PRStatusObserver();
     this.settings = DEFAULT_SETTINGS;
     this.applySettings(cx);
@@ -1179,28 +1183,6 @@ export class Spaces {
     cx.notify();
   }
 
-  // The header's switch between agents in spaces and the Agents panel.
-  agentsSwitch(t) {
-    const on = inlineAgents();
-    return h_flex()
-      .id("inline-agents")
-      .h(26)
-      .px(7)
-      .gap(5)
-      .flex_none()
-      .items_center()
-      .rounded(6)
-      .text_size(TEXT.caption)
-      .cursor_pointer()
-      .when(on, (el) => el.bg(t.hover).text_color(t.foreground))
-      .when(!on, (el) => el.text_color(t.dim))
-      .tooltip(on ? "Agents show in spaces · click for the Agents panel" : "Show agents in spaces")
-      .hover((s) => s.bg(t.hover).text_color(t.foreground))
-      .on_click(() => setInlineAgents(!on, findNode(layout(), "agents")))
-      .child(Icon("bot", 13))
-      .child("Agents");
-  }
-
   // ── Expanded/compact rows and sidebar rendering ──────────────────────────
 
   row({ w, i, g, tree }, t) {
@@ -1531,13 +1513,11 @@ export class Spaces {
           .justify_between()
           .text_size(TEXT.label)
           .text_color(t.dim)
-          .when(!collapsed, (el) => el.child("Spaces"))
+          .child(ListTabs({ active: activeListTab(), collapsed }))
           .child(
             h_flex()
               .gap(2)
               .items_center()
-              // The Agents panel toggle lives in the footer, beside Settings.
-              .when(!collapsed, (el) => el.child(this.agentsSwitch(t)))
               .when(!collapsed, (el) =>
                 el.child(
                   IconButton({

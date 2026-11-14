@@ -6,6 +6,10 @@ This mod is Better Sidebar 3.0.0 from [munza/herdr-mods](https://github.com/munz
 Modified files:
 
 - `main.js`: registers the `card` and `groups` views.
+- `views/list-tabs.js` (added): the sidebar's Spaces/Agents segmented tab bar. The layout's
+  `sidebar-lists` is a stack now — each list gets the sidebar's full height, the tab bar lives in
+  each view's own header (a view renders only while active), and `cmd-shift-a` flips tabs via
+  panel-toggle's `toggle-list`.
 - `views/spaces.js`: issue badges beside PR badges, both opening the issues mod's viewer;
   a live-ports plug icon on the branch line; the hover card; repo-row hover buttons
   (fold worktrees, menu, new worktree); one section per machine (bold bar, green dot while connected, a
@@ -15,20 +19,23 @@ Modified files:
   machine but show under a machine only when they hold its spaces, fold per machine, sum their
   agents when folded, and a drag never leaves its machine; going to a space opens its machine,
   folder and repo; the space menu is `my-menu`;
-  agents and their sub-agent trees drawn under each space (header "Agents" switch, which
-  hides the Agents panel), the fold chevron hides a space's worktrees and agents together;
+  agents and their sub-agent trees drawn under each space, always on (the old "Agents"
+  chip is gone — the Spaces/Agents tabs took its place, and init carries an old off value
+  back over once), the fold chevron hides a space's worktrees and agents together;
   a moon and "Asleep" on a space the hibernate mod put to sleep; every + (Spaces, a machine's
   header, "New space there") starts the space in its machine's home, not the focused folder.
   It shares its drawn space order, and `agent.next` / `agent.prev` follow that order.
   The list scrolls itself (wheel, a draggable thumb) so it can follow the active space's row.
 - `views/panel-toggle.js`: also takes `next-space` / `prev-space`, stepping through spaces in the list's order,
-  and `next-agent` / `prev-agent`, stepping through agents as the list draws them (sub-agents under their parent).
+  `next-agent` / `prev-agent`, stepping through agents as the list draws them (sub-agents under their parent),
+  and `toggle-list`, flipping the sidebar's Spaces/Agents tabs (`cmd-shift-a`).
 - `views/find-node.js`: `hasSpacesView`.
 - `views/ui.js`: exports `RADIUS`.
 - `views/footer.js`: adapted to this layout; "N agents · N need you" while agents show in spaces.
   Its old Agents-panel toggle button is gone: it ignored the inline state and could show agents
-  twice (panel open while inline) or hide both; the header's Agents switch is the single toggle.
+  twice (panel open while inline) or hide both; the tab bar is the single switch.
 - `views/agents.js`: sets agent order only when the layout has no spaces list; exports its helpers (status mark, icon, labels, durations) for the spaces list;
+  its header is the Spaces/Agents tab bar plus the sort menu (in the rail, the icon tab bar alone);
   a sub-agent kept as a pane shows only nested under its parent (not also
   as its own row), and clicking it focuses its pane instead of peeking.
 - `git/pr-status.js`: finds each checkout's issue (git-config link, PR closing references,
@@ -37,6 +44,6 @@ Modified files:
   with the issues mod through shared state) instead of every badge failing silently.
 - `mod.json`: settings for this layout.
 
-Added files: `views/card.js`, `views/groups.js`, `views/space-agents.js`, `views/space-nav.js`, `git/project-icons.js`, and icons
+Added files: `views/card.js`, `views/groups.js`, `views/space-agents.js`, `views/space-nav.js`, `views/list-tabs.js`, `git/project-icons.js`, and icons
 (`bot`, `moon`, `copy`, `ellipsis`, `external`, `folder`, `folder-plus`, `github`, `issue`, `issue-closed`,
 `panel-bottom`, `plug`). Removed: `mod.schema.json`, `icons/sliders.svg`.

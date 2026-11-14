@@ -9,7 +9,7 @@
     "cmd-shift-e": "mod.open:excalidraw"
   },
   "layout:orca": {
-    "cmd-shift-a": "layout.toggle:agents",
+    "cmd-shift-a": "orca-sidebar.toggle-list",
     "cmd-shift-b": "orca-sidebar.toggle-panel",
     "cmd-alt-]": "orca-sidebar.next-space",
     "cmd-alt-[": "orca-sidebar.prev-space",

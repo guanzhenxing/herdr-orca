@@ -33,7 +33,7 @@
             },
             {
               "id": "sidebar-lists",
-              "type": "column",
+              "type": "stack",
               "children": [
                 {
                   "id": "spaces",
@@ -58,10 +58,10 @@
                   "size": {
                     "weight": 1
                   },
-                  "min": 90,
-                  "hidden": true
+                  "min": 90
                 }
-              ]
+              ],
+              "active": "spaces"
             },
             {
               "id": "sidebar-footer",

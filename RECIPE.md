@@ -27,11 +27,12 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     its PR (state icon `#453`, green open, red closed/failed, purple merged, grey draft).
     Under each space or worktree, its **agents** (26px rows lined up with its name: program icon,
     tab name, time in this state, status) and their **sub-agents** (24px rows on tree lines, any
-    depth). The header's **Agents** switch (bot icon) turns this on, the default.
-  - **Agents** panel (`orca-sidebar`, `view: agents`): hidden while agents show in spaces; the
-    Agents switch off brings it back. A footer (`view: footer`): Settings, "3 agents · 2 need you"
-    while agents show in spaces, Add machine — no toggle of its own; the header's Agents switch is
-    the only agents on/off.
+    depth) — always on.
+  - **Agents** tab (`orca-sidebar`, `view: agents`): the sidebar's lists are two tabs sharing the
+    full height — **Spaces | Agents** in a segmented tab bar each view draws in its own header
+    (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
+    header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
+    main space, prefix). A footer (`view: footer`): Settings, "3 agents · 2 need you", Add machine.
   - A space put to sleep shows a moon and **Asleep** on its second line.
 - **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
   shows, Herdr's brand button covers the hiding, so exactly one toggle is on screen at a time; a
@@ -161,7 +162,7 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
 - **Changes**: staging, commit/amend, history, diffs in one centre tab (Better Changes' own docs).
 - **Automations**: scheduled agent prompts, through the `herdr-automations` CLI.
 - Keys (merge `keys.json`): `cmd-n` new worktree, `cmd-shift-n` add project, `cmd-g` VS Code,
-  `cmd-shift-e` Excalidraw; in this layout `cmd-shift-a` toggles Agents, `cmd-shift-b` the right
+  `cmd-shift-e` Excalidraw; in this layout `cmd-shift-a` flips the sidebar's Spaces/Agents tabs, `cmd-shift-b` the right
   panel, `cmd-alt-]` / `cmd-alt-[` next / previous space, `cmd-]` / `cmd-[` next / previous agent, `cmd-w` / `cmd-shift-w` close a tab / pane. Closing a tab by key asks first ("Close tab
   …?", Enter confirms); the tab's ×, its menu's Close and a pane's close button don't.
 
