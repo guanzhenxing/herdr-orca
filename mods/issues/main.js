@@ -97,11 +97,15 @@ export default class Issues extends View {
   }
 
   // The repos checked out here: every local terminal's folder, so the picker can list them first.
+  // Probed in parallel: each ask is a gh call that can take seconds, and folders are
+  // independent of each other.
   scanLocal(cx) {
     const tried = new Set(Object.keys(this.repos).map((k) => JSON.parse(k)[0]));
     const local = new Set(spaces().filter((s) => !s.machine).map((s) => s.id));
     const folders = [...new Set(panes().filter((p) => p.cwd && local.has(spaces().find((s) => s.tabs.some((c) => c.id === p.tab))?.id)).map((p) => p.cwd))];
-    cx.spawn(async () => { for (const cwd of folders) if (!tried.has(cwd)) await this.repoFor(cwd, null); });
+    cx.spawn(async () => {
+      await Promise.all(folders.filter((cwd) => !tried.has(cwd)).map((cwd) => this.repoFor(cwd, null).catch(() => null)));
+    });
   }
 
   // ---- data ----
