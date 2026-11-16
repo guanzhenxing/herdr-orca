@@ -23,7 +23,9 @@ export const ITEMS = [
   { label: "Quick Look", icon: "search", argv: p => ["qlmanage", "-p", p], when: "file", local: true },
   { label: "Open with default app", icon: "file-text", argv: p => ["open", p], local: true },
   { label: "Reveal in Finder", icon: "folder", argv: p => ["open", "-R", p], local: true },
-  { label: "Copy path", icon: "files", argv: p => ["sh", "-c", 'printf %s "$1" | pbcopy', "copy-path", p] },
+  // pbcopy converts its input by locale, and Herdr's exec children carry no LANG/LC_*:
+  // without LC_CTYPE a non-ASCII path is dropped and the clipboard ends up empty.
+  { label: "Copy path", icon: "files", argv: p => ["sh", "-c", 'export LC_CTYPE=UTF-8; printf %s "$1" | pbcopy', "copy-path", p] },
 ];
 
 export function argvOf(item, path) {
