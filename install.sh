@@ -7,21 +7,27 @@
 #   sh install.sh              fresh install; mods you already have that differ are kept and listed
 #   sh install.sh --yes        upgrade: overwrite differing mods and the layout too
 #   sh install.sh --dry-run    report only, write nothing
+#   sh install.sh --with-skills  also install the herdr-cowork skill (opt-in; see README)
 set -e
 cd "$(dirname "$0")"
 HOME_DIR="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
 YES=0
 DRY=0
+WITH_SKILLS=0
 for arg in "$@"; do
   case "$arg" in
     --yes) YES=1 ;;
     --dry-run) DRY=1 ;;
-    *) echo "unknown flag: $arg (use --yes, --dry-run)"; exit 2 ;;
+    --with-skills) WITH_SKILLS=1 ;;
+    *) echo "unknown flag: $arg (use --yes, --dry-run, --with-skills)"; exit 2 ;;
   esac
 done
 
 command -v jq >/dev/null 2>&1 || { echo "install.sh needs jq"; exit 1; }
 [ -f layouts/orca.json ] || { echo "layouts/orca.json missing from the repo"; exit 1; }
+if [ "$WITH_SKILLS" = 1 ] && [ ! -f skills/herdr-cowork/SKILL.md ]; then
+  echo "skills/herdr-cowork/SKILL.md missing from the repo"; exit 1
+fi
 say() { if [ "$DRY" = 1 ]; then echo "[dry] $*"; else echo "$*"; fi; }
 # The home copies carry files the app writes itself (type files, jsconfig, caches): they
 # don't count as a difference.
