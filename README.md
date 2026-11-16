@@ -27,9 +27,21 @@ doesn't include:
 > Add this mod: https://github.com/munza/herdr-mods/tree/main/better-config
 
 Or, from a clone of this repo, one command: `sh install.sh` (`--yes` overwrites mods and the
-layout you already have, `--dry-run` looks first). It merges `keys.json` — bindings you use keep
-their actions — keeps Mod settings where a `mod.schema.json` describes them, runs `herdr-app check`
-on everything it installs, and never touches mods it doesn't ship.
+layout you already have — and, with `--with-skills`, replaces a differing skill copy and
+**deletes user-installed `herdr-cowork` directories at the link locations below**;
+`--dry-run` looks first). It merges `keys.json` — bindings you use keep their actions — keeps
+Mod settings where a `mod.schema.json` describes them, runs `herdr-app check` on everything it
+installs, and never touches mods it doesn't ship.
+
+Add `--with-skills` to also install the [herdr-cowork](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)
+agent skill (vendored in `skills/`, opt-in). The SKILL.md goes to `~/.agents/skills/herdr-cowork/`
+— the cross-agent skills root that DeepSeek Harness, Codex, OpenCode, Gemini and pi read
+natively — plus symlinks into Claude Code (`~/.claude/skills/`), Codex (`~/.codex/skills/`,
+legacy path), Gemini (`~/.gemini/skills/`), OpenCode (`~/.config/opencode/skills/`) and pi
+(`~/.pi/agent/skills/`); agents whose home folder doesn't exist are skipped and listed, not
+created, and Cursor (not installed) isn't linked — add a symlink like the others when you
+install it. Uninstall: `rm -rf ~/.agents/skills/herdr-cowork` and the five `herdr-cowork`
+symlinks.
 
 By hand:
 
@@ -82,10 +94,19 @@ installing:
   `CLAUDE_CONFIG_DIR`, and Codex's rollout files) to count tokens and calls — only numbers leave
   those scripts. Hibernate reads just the session id out of the same files, to resume an agent after
   sleep. No credentials are read.
+- **Skills (opt-in, `--with-skills`):** nothing is fetched — the vendored
+  `skills/herdr-cowork/SKILL.md` is copied and symlinked (locations above). The skill is a
+  prompt protocol: an agent that adopts it as commander runs `hc` to spawn member agent CLIs
+  (each under its own permissions), writes `TEAM.md` in the current workspace and renames tabs
+  through `herdr-app`. Its frontmatter `allowed-tools` pre-authorizes `hc`/`herdr-app` only in
+  Claude Code; other agents apply their own approval flow.
 
 ## Updating this repo
 
 `./sync.sh` copies the layout and these mods from your Herdr home into the repo.
+The vendored skill is refreshed by hand: fetch the gist, change its frontmatter `name` to
+`herdr-cowork`, replace `skills/herdr-cowork/SKILL.md` and commit; installed users upgrade with
+`sh install.sh --with-skills --yes` (links point at the directory, so they follow the new copy).
 `previews/render.sh` redraws `preview.png` from `previews/preview.html` with headless Chrome:
 the preview is an HTML mockup with demo data, so no screenshot of your own work is published.
 
