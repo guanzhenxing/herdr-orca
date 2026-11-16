@@ -103,31 +103,39 @@ if [ "$WITH_SKILLS" = 1 ]; then
   else
     skill_target_state="kept (differs; rerun with --with-skills --yes to overwrite)"
   fi
-  while IFS='|' read -r name home levels; do
-    link="$home/skills/herdr-cowork"
-    if [ ! -d "$home" ]; then
-      skill_link_notes="$skill_link_notes
+  if [ -f "$skill_home_target/SKILL.md" ] || [ "$skill_copy" = 1 ]; then
+    while IFS='|' read -r name home levels; do
+      link="$home/skills/herdr-cowork"
+      if [ ! -d "$home" ]; then
+        skill_link_notes="$skill_link_notes
 $name: skipped ($home not installed)"
-    elif [ -L "$link" ] && [ -e "$skill_home_target" ] \
-      && [ "$(cd -P "$link" 2>/dev/null && pwd)" = "$(cd -P "$skill_home_target" 2>/dev/null && pwd)" ]; then
-      skill_link_notes="$skill_link_notes
+      elif [ -L "$link" ] && [ -e "$skill_home_target" ] \
+        && [ "$(cd -P "$link" 2>/dev/null && pwd)" = "$(cd -P "$skill_home_target" 2>/dev/null && pwd)" ]; then
+        skill_link_notes="$skill_link_notes
 $name: up to date"
-    elif [ "$YES" = 1 ] || [ ! -e "$link" ]; then
-      skill_links="$skill_links $name"
-    elif [ -L "$link" ]; then
-      skill_link_notes="$skill_link_notes
+      elif [ "$YES" = 1 ] || [ ! -e "$link" ]; then
+        skill_links="$skill_links $name"
+      elif [ -L "$link" ]; then
+        skill_link_notes="$skill_link_notes
 $name: kept (link points elsewhere; --yes replaces it)"
-    else
-      skill_link_notes="$skill_link_notes
+      else
+        skill_link_notes="$skill_link_notes
 $name: kept (not a symlink; --yes replaces it)"
-    fi
-  done <<EOF
+      fi
+    done <<EOF
 claude|$HOME/.claude|2
 codex|$HOME/.codex|2
 gemini|$HOME/.gemini|2
 opencode|$HOME/.config/opencode|3
 pi|$HOME/.pi/agent|3
 EOF
+  elif [ -L "$skill_home_target" ]; then
+    skill_link_notes="$skill_link_notes
+links skipped (the shared target symlink is dangling — fix or remove it yourself; --yes never touches it)"
+  else
+    skill_link_notes="$skill_link_notes
+links skipped (the kept copy at the shared target has no SKILL.md; rerun with --with-skills --yes to replace it)"
+  fi
 fi
 
 echo "Install from $(pwd) into $HOME_DIR"
