@@ -139,7 +139,7 @@ if [ "$WITH_SKILLS" = 1 ]; then
       skill_link_notes="$skill_link_notes
 $name: skipped ($home not installed)"
     elif [ -L "$link" ] && [ -e "$skill_home_target" ] \
-      && [ "$(cd "$link" 2>/dev/null && pwd)" = "$(cd "$skill_home_target" 2>/dev/null && pwd)" ]; then
+      && [ "$(cd -P "$link" 2>/dev/null && pwd)" = "$(cd -P "$skill_home_target" 2>/dev/null && pwd)" ]; then
       skill_link_notes="$skill_link_notes
 $name: up to date"
     elif [ "$YES" = 1 ] || [ ! -e "$link" ]; then
@@ -251,7 +251,7 @@ mkdir -p "$T/.claude" "$T/.codex" "$T/.gemini" "$T/.config/opencode" "$T/.pi/age
 HOME="$T" PATH="$T/bin:$PATH" sh install.sh --with-skills | grep -E 'skill|Done'
 cmp skills/herdr-cowork/SKILL.md "$T/.agents/skills/herdr-cowork/SKILL.md" && echo "copy identical"
 for p in "$T/.claude/skills/herdr-cowork" "$T/.codex/skills/herdr-cowork" "$T/.gemini/skills/herdr-cowork" "$T/.config/opencode/skills/herdr-cowork" "$T/.pi/agent/skills/herdr-cowork"; do
-  [ "$(cd "$p" && pwd)" = "$(cd "$T/.agents/skills/herdr-cowork" && pwd)" ] && echo "OK $p" || echo "BAD $p -> $(readlink "$p")"
+  [ "$(cd -P "$p" && pwd)" = "$(cd -P "$T/.agents/skills/herdr-cowork" && pwd)" ] && echo "OK $p" || echo "BAD $p -> $(readlink "$p")"
 done
 HOME="$T" PATH="$T/bin:$PATH" sh install.sh --with-skills | grep 'skill'
 ```
@@ -291,7 +291,7 @@ Expected: middle run says `kept (differs...)`; `--yes` run says `replace` and `S
 ```bash
 rm -rf "$T/.agents/skills/herdr-cowork"        # the five links are now dangling
 HOME="$T" PATH="$T/bin:$PATH" sh install.sh --with-skills --yes | grep -cE 'linked'
-[ "$(cd "$T/.claude/skills/herdr-cowork" && pwd)" = "$(cd "$T/.agents/skills/herdr-cowork" && pwd)" ] && echo "dangling repaired"
+[ "$(cd -P "$T/.claude/skills/herdr-cowork" && pwd)" = "$(cd -P "$T/.agents/skills/herdr-cowork" && pwd)" ] && echo "dangling repaired"
 ```
 
 Expected: the count equals the number of agent homes present (≥ 1; five in this fixture), `dangling repaired`.
