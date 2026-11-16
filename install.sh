@@ -212,6 +212,42 @@ else
   fi
 fi
 
+# herdr-cowork skill (--with-skills): the copy first; links only if it landed, so a
+# failed copy never leaves five dangling links for every agent to list as a bad skill.
+if [ "$WITH_SKILLS" = 1 ]; then
+  skill_ok=1
+  if [ "$skill_copy" = 1 ]; then
+    if mkdir -p "$skill_home_target" && cp skills/herdr-cowork/SKILL.md "$skill_home_target/SKILL.md"; then
+      echo "skill herdr-cowork: SKILL.md -> $skill_home_target"
+    else
+      echo "skill herdr-cowork: copy failed — agent links skipped"
+      skill_ok=0
+    fi
+  fi
+  if [ "$skill_ok" = 1 ] && { [ -d "$skill_home_target" ] || [ -L "$skill_home_target" ]; }; then
+    for entry in $skill_agents; do
+      name=${entry%%|*}; rest=${entry#*|}; home=${rest%%|*}; levels=${rest##*|}
+      case " $skill_links " in *" $name "*) ;; *) continue ;; esac
+      if ! mkdir -p "$home/skills"; then
+        echo "skill herdr-cowork: cannot create $home/skills"; continue
+      fi
+      link="$home/skills/herdr-cowork"
+      if [ -d "$link" ] && [ ! -L "$link" ]; then
+        rm -rf "$link" || { echo "skill herdr-cowork: cannot remove your $link"; continue; }
+      fi
+      case "$levels" in
+        2) rel="../../.agents/skills/herdr-cowork" ;;
+        *) rel="../../../.agents/skills/herdr-cowork" ;;
+      esac
+      if ln -sfn "$rel" "$link"; then
+        echo "skill herdr-cowork: linked $link"
+      else
+        echo "skill herdr-cowork: link failed at $link"
+      fi
+    done
+  fi
+fi
+
 check_failed=""
 if command -v herdr-app >/dev/null 2>&1; then
   for name in $install_mods; do
