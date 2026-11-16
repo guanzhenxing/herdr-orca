@@ -1,48 +1,50 @@
 # herdr-cowork skill 集成设计
 
-日期：2026-11-16
-状态：已确认（与用户逐节过审）
+日期：2026-11-16（同日经两遍独立审查修订）
+状态：已确认（设计逐节过审 + 双遍独立审查发现已并入）
 
 ## 背景
 
-[ninehills 的 cowork skill](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)（v1.1.0）是一份多 Agent 协作流程协议：让运行在 Herdr 终端里的任一 CLI agent（claude/pi/codex）担任 Commander，通过 `hc` CLI 启动、委派、核验、清理成员 agent，以 TEAM.md 为共享注册表。它编排 agent，而 herdr-orca 可视化 agent——两者互补。
+[ninehills 的 cowork skill](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)（v1.1.0）是一份多 Agent 协作流程协议：让运行在 Herdr 终端里的任一 CLI agent 担任 Commander，通过 `hc` CLI 启动、委派、核验、清理成员 agent，以 TEAM.md 为共享注册表。它编排 agent，而 herdr-orca 可视化 agent——两者互补。
 
-前置决策（2026-11-10 会话，a0fb882b）：
+**许可记录**：上游 gist 未声明任何许可证；维护者评估后决定将全文 vendor 入本 Apache-2.0 仓库。THIRD_PARTY.md 的 License 列如实写 "none stated"，NOTICE 增加署名行，不对此作法律结论。
 
-- 改名 `cowork` → `herdr-cowork`：skill 装入跨工具共享目录后，名字必须自带 Herdr 边界（`allowed-tools` 只放行 `hc`/`herdr-app`）
-- 安装位置遵循本机既有软链模式：实体在 `~/.agents/skills/`，软链到各 agent 的用户级 skills 目录
+### Agent 覆盖矩阵（经官方文档与源码核实）
 
-**Agent 覆盖矩阵**（2026-11-16 补充调研确认；要求：Herdr 支持的 agent 必须全部可用）：
+`~/.agents/skills/` 是 [Agent Skills](https://agentskills.io/specification) 生态的跨 agent 标准枢纽：六个 agent 中**五个原生扫描它**，只有 Claude Code 例外。
 
-| Agent | skill 发现机制 | 动作 | 软链相对路径 |
+| Agent | 发现机制（核实依据） | 动作 | 相对软链路径 |
 |---|---|---|---|
-| Claude Code | `~/.claude/skills/` | 软链 | `../../.agents/skills/herdr-cowork` |
-| Codex | `~/.codex/skills/` | 软链 | `../../.agents/skills/herdr-cowork` |
-| OpenCode | `~/.config/opencode/skills/` | 软链 | `../../../.agents/skills/herdr-cowork` |
-| Gemini | `~/.gemini/skills/` | 软链 | `../../.agents/skills/herdr-cowork` |
-| pi | `~/.pi/agent/skills/` | 软链 | `../../../.agents/skills/herdr-cowork` |
-| DeepSeek Harness | 原生扫描 `~/.agents/skills/`（六个扫描根之一，用户级 rank 500） | 零工作 | —（规范位置天然被发现） |
-| Cursor | 未安装 | 暂不处理，README 备注加装法 | — |
+| Claude Code | 仅 `~/.claude/skills/` 等，**不扫 `~/.agents`**（[官方文档](https://code.claude.com/docs/en/skills)） | 软链（**唯一必需**） | `../../.agents/skills/herdr-cowork` |
+| Codex | 规范 USER 位置是 `~/.agents/skills`（[官方](https://learn.chatgpt.com/docs/build-skills)、[cli#14153](https://github.com/cli/cli/issues/14153)）；`~/.codex/skills` 为**弃用兼容路径** | 软链（**legacy-compat 保险**，标注弃用） | `../../.agents/skills/herdr-cowork` |
+| Gemini | `~/.gemini/skills/`（[官方文档](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md)）；亦兼容扫描 `~/.agents/skills` | 软链（对冲老版本） | `../../.agents/skills/herdr-cowork` |
+| OpenCode | `~/.config/opencode/skills/`（复数；[官方文档](https://opencode.ai/docs/skills)）；亦列 `~/.agents/skills` 为全局兼容位置 | 软链（对冲老版本） | `../../../.agents/skills/herdr-cowork` |
+| pi | `~/.pi/agent/skills/`（[pi-mono 文档](https://upd.dev/badlogic/pi-mono/src/branch/main/packages/coding-agent/docs/skills.md)）；亦列 `~/.agents/skills` 为全局位置 | 软链（对冲老版本） | `../../../.agents/skills/herdr-cowork` |
+| DeepSeek Harness | rank-500 用户根 `<agentsHome>/skills`，源码定死默认 `~/.agents/skills`（[skills.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md)、[home-paths](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/util/home-paths/src/index.ts)） | 零工作 | — |
+| Cursor | 本机未安装 | 暂不处理，README 备注照矩阵补行 | — |
 
-依据：五个软链目标目录本机均已存在且已在用同款 `-> ../../agents/skills/<name>` 软链模式；DSH 的 skills 子系统文档列出 `<agentsHome>/skills` 为用户级扫描根。`~/.agents/skills/` 是跨 agent 标准枢纽（DSH 扫描根 + pi/OpenCode 实现的 Agent Skills standard），实体放此处即站在标准上。
+**软链策略：保险版（5 条）**——Claude 必需；Gemini/OpenCode/pi 建在各自当前合法位置对冲用户机器上的老版本；Codex 建在弃用路径对冲不扫 `~/.agents` 的老版本。本机五个目标目录均已有 `-> .agents/skills/<name>` 同款软链先例（OpenCode/pi 为 3 级上溯）。
 
-本设计由维护者拍板的两个关键决策：
+### 决策记录
 
-1. **SKILL.md 直接入库**（vendor），不在安装时从 gist 拉取。上游 gist 无许可证声明，维护者评估后认为入库无许可风险；入库后安装环节是纯本地复制，无网络依赖、无 sed 改名脆弱性。
-2. **可选安装**：默认不装，`--with-skills` 才装。写入面从 `~/.config/herdr-app/` 扩大到全局 agent 配置（`~/.agents`、`~/.claude`、`~/.codex`），对用户保守，符合发行包"透明、不越界"的调性。
+1. **vendor 入库**（维护者拍板）：SKILL.md 直接进仓库，不在安装时拉取 gist。安装环节因此是纯本地复制，无网络依赖。
+2. **可选安装**：默认不装，`--with-skills` 才装。写入面从 `~/.config/herdr-app/` 扩大到全局 agent 配置，对用户保守。
+3. **改名 `cowork` → `herdr-cowork`**：名字必须自带 Herdr 边界；顺带修复上游违反规范"name 须匹配父目录"的问题（目录与 `name:` 同步改）。
+4. **软链层保险版**（见矩阵）。
 
 ## 目标
 
 1. 仓库新增 `skills/herdr-cowork/`，随 git 版本化、PR 可审
-2. `install.sh --with-skills` 把 skill 装到用户机器，语义与现有 mods 环节一致
-3. README 与 THIRD_PARTY.md 如实记录安装面与致谢
+2. `install.sh --with-skills` 把 skill 装到用户机器，语义与现有 mods 环节同构
+3. README / THIRD_PARTY.md / NOTICE 如实记录安装面、运行期执行面与致谢
 
 ## 非目标
 
-- Orca mod / Team 面板（读取 TEAM.md 的 UI 支持）——Phase 2 另议
-- 修改 `sync.sh`（它同步 Herdr home 里的布局/mods；skill 源头是 gist，不是本地安装副本）
-- 上游更新的自动化脚本（单文件，README 记手动流程即可）
-- Cursor 的软链（本机未安装；README 备注安装 Cursor 后参照矩阵补一行即可）
+- Orca mod / Team 面板（Phase 2 另议）
+- 修改 `sync.sh`（它同步 Herdr home 的布局/mods；skill 源头是 gist）
+- 上游更新的自动化脚本（README 记手动流程）
+- Cursor 软链（未安装；README 备注即可）
+- 逐 agent 的运行期加载自动化测试（验收做落位验证；真机加载抽验可选，见验收节）
 
 ## 设计
 
@@ -55,56 +57,76 @@ skills/
                        name: cowork 改为 name: herdr-cowork，其余逐字保留
 ```
 
+frontmatter 的 `version: 1.1.0` 字段非 agentskills.io 规范字段（六 agent 均容忍，DSH/严格校验器会视作扩展信息），逐字保留并在 THIRD_PARTY 注记一句。
+
 ### 2. install.sh
 
-- usage 注释新增 `--with-skills` 说明；flag 解析 case 加入 `--with-skills)`
-- 新环节置于 herdr-automations CLI 环节之后、收尾提示之前，仅在 `--with-skills` 时执行
-- 动作：
-  1. `mkdir -p ~/.agents/skills/herdr-cowork`，复制仓库内 `skills/herdr-cowork/SKILL.md`
-  2. 按覆盖矩阵创建五处软链：`~/.claude/skills/herdr-cowork`、`~/.codex/skills/herdr-cowork`、`~/.gemini/skills/herdr-cowork`（上溯 2 级），`~/.config/opencode/skills/herdr-cowork`、`~/.pi/agent/skills/herdr-cowork`（上溯 3 级）；目标目录不存在则 `mkdir -p`（如用户从未装过某 agent）
-  3. DSH 无需任何动作（原生扫描 `~/.agents/skills/`）
-- 决策表（每个位置独立判定）：
+usage 注释与 flag 解析加 `--with-skills`。
+
+**环节结构（关键——dry-run 门约束）**：现有脚本是"判定 → `say()` 报告 → dry-run 在 L93 `exit 0` → 写入"四段。skill 环节必须拆成两半嵌入：
+
+- **前置守卫**（flag 解析后）：`[ "$WITH_SKILLS" = 1 ] && { [ -f skills/herdr-cowork/SKILL.md ] || { echo "skills/herdr-cowork/SKILL.md missing"; exit 1; } }`（仿 L24 对 layouts/orca.json 的先例）
+- **判定+报告**：与 mods 判定（L33-54）同区，全部状态判定在 dry-run 门**之前**完成，结果经 `say()` 并入报告块（L84-91）
+- **写入块**：置于 herdr-automations CLI 环节**之后**、收尾提示之前
+
+**动作**（写入块内）：
+
+1. 复制仓库 `skills/herdr-cowork/SKILL.md` → `~/.agents/skills/herdr-cowork/SKILL.md`
+2. 复制**成功后**才建五处软链（见错误处理）；软链一律 `ln -sfn`
+3. agent 主目录（`~/.claude`、`~/.codex`、`~/.gemini`、`~/.config/opencode`、`~/.pi`）不存在的位置**跳过并提示**，不做投机性 `mkdir -p` 预建（避免 README 清单外写入；主目录存在而 skills 子目录缺失时可建子目录）
+
+**决策表**（每处独立判定；"正确软链"定义为**解析后目标等于** `~/.agents/skills/herdr-cowork`，非字符串相等）：
 
 | 目标状态 | 默认（`--with-skills`） | 加 `--yes` |
 |---|---|---|
 | `~/.agents/skills/herdr-cowork` 不存在 | 复制安装 | 同左 |
-| 存在且内容与仓库副本一致 | 报 "up to date" | 同左 |
-| 存在但内容不同 | 保留用户版本，提示可 `--yes` 覆盖 | 覆盖为仓库副本 |
-| 软链位置：不存在 | 建软链 | 同左 |
-| 软链位置：已是指向正确目标的软链 | 不动，报 "up to date" | 同左 |
-| 软链位置：软链但指向别处 | 保留，提示 | 重建为正确软链 |
-| 软链位置：真实目录（用户自有安装） | 保留，明确提示 | 覆盖（沿用 mods 目录在 `--yes` 下被覆盖的既有语义） |
+| 存在且 SKILL.md 字节一致（`cmp`；目录内多余文件不参与判定、也不被删除） | 报 "up to date" | 同左 |
+| 存在但内容不同 | 保留，提示可 `--yes` 覆盖 | 覆盖为仓库副本（`cp` 覆盖 SKILL.md，不动目录内其他文件） |
+| 是**软链**（指向用户 dotfiles 等） | **保留 + 提示，`--yes` 也不动** | 同左（防穿透写/毁链） |
+| 软链位置：不存在 / **断链**（`-L` 且 `! -e`） | 建软链（`ln -sfn`，断链先替换） | 同左 |
+| 软链位置：解析后指向正确目标 | 不动，报 "up to date" | 同左 |
+| 软链位置：软链但解析后指向别处 | 保留，提示 | 重建为正确软链 |
+| 软链位置：真实目录（用户自装） | 保留，明确提示 | **`rm -rf` 后建软链**（比 mods 的 rsync 覆盖更具破坏性，README 明示） |
 
-- `--dry-run`：只报告上述判定结果，不写任何东西
-- 软链的建立**不依赖** `~/.agents` 副本的判定结果（用户保留自有版本时，软链照常确保指向它——`~/.agents/skills` 本就是共享位置，暴露是用户装它的本意）
-- `--yes` 的组合语义（已确认）：覆盖 `~/.agents` 里的副本 **且** 重建五处软链；没有第三种隐式行为
+**`--yes` 语义**：逐位置独立生效——仅对"内容不同/错向软链/真实目录"三种状态动手，已正确的位置连 `--yes` 也不重建。`~/.agents` 目标是软链时永远不动。
 
 ### 3. 文档
 
 - `README.md`：
-  - Install 段加一行：`--with-skills` 会同时安装 herdr-cowork skill（写入哪些位置、如何卸载）
-  - "What this runs" 的 Files 段如实列出 `--with-skills` 写入的六个位置（`~/.agents/skills/herdr-cowork/` 副本 + 五处软链）及各 agent 的发现机制一句话说明；skills 为本地复制，Network 段不变
-- `THIRD_PARTY.md`：新增致谢条目——作者 ninehills、gist 来源 URL、上游版本 v1.1.0、本地修改仅 frontmatter `name` 字段（cowork → herdr-cowork）
+  - Install 段：L29 既有括注 `--yes overwrites mods and the layout you already have` **必须扩写**，如实说明 `--with-skills --yes` 会删除五处软链位置上用户自装的非软链目录；加 `--with-skills` 一行说明与手工卸载步骤（删一副本五软链）
+  - 新增 **"Skills (opt-in)"** 小节（或并入 "What this runs"）披露两面：**安装面**（1 副本 + 5 软链的位置清单、跳过未装 agent 规则）；**运行期执行面**——启用后 agent 按 SKILL.md 经 `hc` 拉起成员 CLI（claude/codex/pi 等在各自权限流下运行）、在当前工作区写 TEAM.md、`herdr-app` 改 tab 名。这是比现有任何条目都大的新增执行面，必须写明
+- `THIRD_PARTY.md`：新增条目——作者 ninehills、gist URL、上游版本 v1.1.0、License 列写 **"none stated"**、本地修改：frontmatter `name` 字段（cowork → herdr-cowork）
+- `NOTICE`：为 vendored SKILL.md 增加署名行（与仓内其他 bundled 组件同级披露）
 
 ### 4. 上游更新流程
 
-README 的 "Updating this repo" 段加一句：上游 gist 更新时，维护者拉取原文、改 `name` 字段后替换 `skills/herdr-cowork/SKILL.md` 并提交。不建自动化脚本。
+README "Updating this repo" 段加一句：上游 gist 更新时，维护者拉原文、改 `name` 字段后替换 `skills/herdr-cowork/SKILL.md` 提交；已装用户重跑 `sh install.sh --with-skills --yes` 升级（软链指向目录，自动跟随副本更新）。
 
 ## 错误处理
 
-- 复制失败（磁盘/权限）：报错并继续安装其余部分（skill 是可选件，同 CLI 环节的优雅降级风格）
-- 软链创建失败（如 `~/.claude/skills/` 无法创建）：逐条报错，不中断
-- 入库校验：`name: herdr-cowork` 字段由 vendor 时人工保证；install 不再运行时校验（无 sed 即无格式漂移面）
+`install.sh` 顶部 `set -e`——skill 环节**每条命令**须 `|| { echo …; }` 守卫（仿 CLI 环节 L128 先例），任何单点失败不中断整体安装：
+
+- **复制失败**（磁盘/权限）：跳过**全部**建链（否则产出五个 agent 都会列为坏 skill 的断链），输出一条 skill 整体失败汇总
+- 单处建链失败：逐条报错，继续其余位置
+- 仓库缺 SKILL.md：前置 `exit 1`（见上），不留半成品
 
 ## 验收
 
-以临时 `$HOME`（如 `HOME=/tmp/orca-test sh install.sh …`）验证，不动真实环境：
+临时 `$HOME` 验证（`HOME=/tmp/orca-test`）；为避免 CLI 环节的 go build/GitHub 下载噪音与联网，先在 PATH 放一个 `herdr-automations` stub 触发"already installed"分支，或明示接受该噪音：
 
 1. `sh -n install.sh` 语法通过
 2. 不带 `--with-skills`：全程无 skill 相关动作与输出
-3. `--with-skills --dry-run`：报告"将安装"，实际零写入
-4. `--with-skills` 全新安装：副本内容与仓库一致（`diff`）；覆盖矩阵五处软链全部存在且 `readlink` 指向正确（含 OpenCode/pi 的 3 级相对路径）
-5. 重复执行：报 "up to date"，幂等
-6. 篡改已装副本后重跑：保留 + 提示；`--with-skills --yes` 后恢复为仓库副本、软链重建
-7. 在软链位置放真实目录：默认保留提示，`--yes` 后被覆盖为软链（对五处逐一验证至少一处即可）
-8. README 与 THIRD_PARTY.md 更新到位
+3. `--with-skills --dry-run`：**报告可达**（判定在 dry-run 门之前），报告"将安装"，实际零写入
+4. `--with-skills` 全新安装（预建五个 agent 主目录）：副本与仓库 `cmp` 一致；五处软链 `readlink` 解析后均指向 `~/.agents/skills/herdr-cowork`（含 OpenCode/pi 3 级相对路径）
+5. 某个 agent 主目录缺失（如删掉临时 `~/.gemini`）：该位置跳过 + 提示，其余四照装
+6. 重复执行：全部 "up to date"，幂等
+7. 篡改已装副本后重跑：保留 + 提示；`--with-skills --yes` 后恢复仓库副本；已正确软链在 `--yes` 下**不被重建**
+8. 断链场景：删掉 `~/.agents/skills/herdr-cowork` 实体后重跑：五处断链被 `ln -sfn` 正确替换，不报 EEXIST
+9. `~/.agents/skills/herdr-cowork` 是软链（链到别处）：默认与 `--yes` 均保留 + 提示
+10. 软链位置放真实目录：默认保留提示；`--yes` 后被 `rm -rf` 换软链（任选一处验证）
+11. README（含 L29 括注、"Skills" 小节）、THIRD_PARTY（License="none stated"）、NOTICE 更新到位
+12. （可选抽验，真机）`claude`、`gemini` 各自的 skills 列表命令能发现 herdr-cowork
+
+## 审查记录
+
+2026-11-16 两遍独立审查（事实正确性 / 健壮性与产品面），合计 0 BLOCKER、9 MAJOR、16 MINOR，全部核验后并入本稿。关键修正：`~/.agents/skills` 为五家原生扫描根（Codex 弃用路径、DSH 源码实锤）；dry-run 门时序约束；决策表补断链/软链两行；`--yes` 破坏半径显性化；运行期执行面披露。两遍审查中 Pass 2 的"allowed-tools 是 Claude 专属"说法被 Pass 1 以 agentskills.io 规范证伪（标准化可选字段，非 Claude agent 忽略之，仅无预授权），取后者。
