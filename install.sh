@@ -111,7 +111,7 @@ if [ "$WITH_SKILLS" = 1 ]; then
       skill_link_notes="$skill_link_notes
 $name: skipped ($home not installed)"
     elif [ -L "$link" ] && [ -e "$skill_home_target" ] \
-      && [ "$(cd "$link" 2>/dev/null && pwd)" = "$(cd "$skill_home_target" 2>/dev/null && pwd)" ]; then
+      && [ "$(cd -P "$link" 2>/dev/null && pwd)" = "$(cd -P "$skill_home_target" 2>/dev/null && pwd)" ]; then
       skill_link_notes="$skill_link_notes
 $name: up to date"
     elif [ "$YES" = 1 ] || [ ! -e "$link" ]; then
