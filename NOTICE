@@ -18,3 +18,7 @@ jmalicki/herdr-mod-ai-usage (MIT) does; no code is copied from it.
 
 mods/excalidraw bundles Excalidraw (MIT) and mods/file-icons bundles icons from the
 Material Icon Theme (MIT); their notices are in those folders.
+
+skills/herdr-cowork/SKILL.md is the cowork skill (v1.1.0) from ninehills' gist
+(https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096); no license is stated
+upstream. Only its frontmatter name field is changed (cowork → herdr-cowork).
