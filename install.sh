@@ -91,7 +91,6 @@ fi
 # created. "Correct link" means it resolves to the shared copy, not string equality.
 skill_target_state=""; skill_copy=0; skill_links=""; skill_link_notes=""
 skill_home_target="$HOME/.agents/skills/herdr-cowork"
-skill_agents="claude|$HOME/.claude|2 codex|$HOME/.codex|2 gemini|$HOME/.gemini|2 opencode|$HOME/.config/opencode|3 pi|$HOME/.pi/agent|3"
 if [ "$WITH_SKILLS" = 1 ]; then
   if [ -L "$skill_home_target" ]; then
     skill_target_state="kept (is a symlink; never touched, even with --yes)"
@@ -104,8 +103,7 @@ if [ "$WITH_SKILLS" = 1 ]; then
   else
     skill_target_state="kept (differs; rerun with --with-skills --yes to overwrite)"
   fi
-  for entry in $skill_agents; do
-    name=${entry%%|*}; rest=${entry#*|}; home=${rest%%|*}; levels=${rest##*|}
+  while IFS='|' read -r name home levels; do
     link="$home/skills/herdr-cowork"
     if [ ! -d "$home" ]; then
       skill_link_notes="$skill_link_notes
@@ -121,9 +119,15 @@ $name: up to date"
 $name: kept (link points elsewhere; --yes replaces it)"
     else
       skill_link_notes="$skill_link_notes
-$name: kept (real directory; --yes replaces it)"
+$name: kept (not a symlink; --yes replaces it)"
     fi
-  done
+  done <<EOF
+claude|$HOME/.claude|2
+codex|$HOME/.codex|2
+gemini|$HOME/.gemini|2
+opencode|$HOME/.config/opencode|3
+pi|$HOME/.pi/agent|3
+EOF
 fi
 
 echo "Install from $(pwd) into $HOME_DIR"
@@ -224,9 +228,8 @@ if [ "$WITH_SKILLS" = 1 ]; then
       skill_ok=0
     fi
   fi
-  if [ "$skill_ok" = 1 ] && { [ -d "$skill_home_target" ] || [ -L "$skill_home_target" ]; }; then
-    for entry in $skill_agents; do
-      name=${entry%%|*}; rest=${entry#*|}; home=${rest%%|*}; levels=${rest##*|}
+  if [ "$skill_ok" = 1 ] && [ -f "$skill_home_target/SKILL.md" ]; then
+    while IFS='|' read -r name home levels; do
       case " $skill_links " in *" $name "*) ;; *) continue ;; esac
       if ! mkdir -p "$home/skills"; then
         echo "skill herdr-cowork: cannot create $home/skills"; continue
@@ -244,7 +247,15 @@ if [ "$WITH_SKILLS" = 1 ]; then
       else
         echo "skill herdr-cowork: link failed at $link"
       fi
-    done
+    done <<EOF
+claude|$HOME/.claude|2
+codex|$HOME/.codex|2
+gemini|$HOME/.gemini|2
+opencode|$HOME/.config/opencode|3
+pi|$HOME/.pi/agent|3
+EOF
+  elif [ -L "$skill_home_target" ] && [ ! -e "$skill_home_target" ]; then
+    echo "skill herdr-cowork: target symlink is dangling — agent links skipped"
   fi
 fi
 
