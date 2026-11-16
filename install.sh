@@ -86,6 +86,46 @@ else
   done
 fi
 
+# herdr-cowork skill (--with-skills): everything is decided here, before the dry-run
+# gate, and only written after it. Agent homes that don't exist are skipped, not
+# created. "Correct link" means it resolves to the shared copy, not string equality.
+skill_target_state=""; skill_copy=0; skill_links=""; skill_link_notes=""
+skill_home_target="$HOME/.agents/skills/herdr-cowork"
+skill_agents="claude|$HOME/.claude|2 codex|$HOME/.codex|2 gemini|$HOME/.gemini|2 opencode|$HOME/.config/opencode|3 pi|$HOME/.pi/agent|3"
+if [ "$WITH_SKILLS" = 1 ]; then
+  if [ -L "$skill_home_target" ]; then
+    skill_target_state="kept (is a symlink; never touched, even with --yes)"
+  elif [ ! -e "$skill_home_target" ]; then
+    skill_target_state="install"; skill_copy=1
+  elif cmp -s skills/herdr-cowork/SKILL.md "$skill_home_target/SKILL.md"; then
+    skill_target_state="up to date"
+  elif [ "$YES" = 1 ]; then
+    skill_target_state="replace"; skill_copy=1
+  else
+    skill_target_state="kept (differs; rerun with --with-skills --yes to overwrite)"
+  fi
+  for entry in $skill_agents; do
+    name=${entry%%|*}; rest=${entry#*|}; home=${rest%%|*}; levels=${rest##*|}
+    link="$home/skills/herdr-cowork"
+    if [ ! -d "$home" ]; then
+      skill_link_notes="$skill_link_notes
+$name: skipped ($home not installed)"
+    elif [ -L "$link" ] && [ -e "$skill_home_target" ] \
+      && [ "$(cd "$link" 2>/dev/null && pwd)" = "$(cd "$skill_home_target" 2>/dev/null && pwd)" ]; then
+      skill_link_notes="$skill_link_notes
+$name: up to date"
+    elif [ "$YES" = 1 ] || [ ! -e "$link" ]; then
+      skill_links="$skill_links $name"
+    elif [ -L "$link" ]; then
+      skill_link_notes="$skill_link_notes
+$name: kept (link points elsewhere; --yes replaces it)"
+    else
+      skill_link_notes="$skill_link_notes
+$name: kept (real directory; --yes replaces it)"
+    fi
+  done
+fi
+
 echo "Install from $(pwd) into $HOME_DIR"
 [ -n "$uptodate_mods" ] && say "up to date:$uptodate_mods"
 [ -n "$install_mods" ] && say "mods to install:$install_mods"
@@ -95,6 +135,14 @@ if [ "$install_keys" = 1 ]; then say "keys.json: none yet, installing the packag
 elif [ "$keys_changed" = 1 ]; then say "keys.json: merging in new bindings"
 elif [ "$keys_conflicts" = "" ]; then say "keys.json: already merged"; fi
 [ -n "$keys_conflicts" ] && say "keys.json conflicts:$keys_conflicts"
+
+if [ "$WITH_SKILLS" = 1 ]; then
+  say "skill herdr-cowork: $skill_target_state"
+  [ -n "$skill_links" ] && say "skill links to create:$skill_links"
+  printf '%s' "$skill_link_notes" | while IFS= read -r note || [ -n "$note" ]; do
+    [ -n "$note" ] && say "skill $note"
+  done
+fi
 
 if [ "$DRY" = 1 ]; then
   echo "dry run: nothing written."
