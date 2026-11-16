@@ -161,11 +161,13 @@ fi
 if [ "$WITH_SKILLS" = 1 ]; then
   say "skill herdr-cowork: $skill_target_state"
   [ -n "$skill_links" ] && say "skill links to create:$skill_links"
-  printf '%s' "$skill_link_notes" | while IFS= read -r note; do
-    [ -n "$note" ] && say "skill$note"
+  printf '%s' "$skill_link_notes" | while IFS= read -r note || [ -n "$note" ]; do
+    [ -n "$note" ] && say "skill $note"
   done
 fi
 ```
+
+(The `|| [ -n "$note" ]` is required: without a trailing newline in `skill_link_notes`, plain `read` returns non-zero on the final unterminated line and silently drops it — the last agent's note. Found during Task 3 execution.)
 
 - [ ] **Step 4: Verify decisions and dry-run reachability (acceptance items 2, 3, 5)**
 
