@@ -16,11 +16,12 @@ function location() {
   const space = spaces().find(s => s.active), f = focused();
   const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
   const on = f?.pane === null ? (f.terminal?.includes("/") ? f.terminal.split("/")[0] : null) : space?.machine ?? null;
-  const cwd = pane?.cwd || f?.cwd || null;
+  let cwd = pane?.cwd || f?.cwd || null;
   if (cwd) {
     if (space) LAST_CWD.set(space.id, cwd);
-  } else if (space) cwd = LAST_CWD.get(space.id) || space.folder;
-  else cwd = space?.folder;
+  } else if (space) {
+    cwd = LAST_CWD.get(space.id) || space.folder;
+  }
   return { cwd, on, space: space?.id };
 }
 const key = () => JSON.stringify(location());
