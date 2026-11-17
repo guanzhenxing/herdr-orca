@@ -33,7 +33,7 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
     header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
     main space, prefix); groups separate by their headers alone, like the Spaces list's sections.
-    A footer (`view: footer`): **Settings** and **Mod settings** (munza's `better-config`) as
+    A footer (`view: footer`): **Settings** and **Mod settings** (the vendored `better-config`) as
     icon buttons at the left (tooltips name them), "3 agents · 2 need you" at the right, Add machine.
   - A space put to sleep shows a moon and **Asleep** on its second line.
 - **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
@@ -44,7 +44,7 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
   framed even when alone) with a 30px `my-pane` header: program icon, agent name, folder, status,
   and split/zoom/close on the right.
 - **Right panel** (368px, 280–900, hidden until toggled): a stack of **Files** (`files-open-with`)
-  and **Changes** (munza's `better-changes`, installed separately).
+  and **Changes** (the vendored `better-changes`).
 - **Status bar** (28px): Claude Code / Codex usage windows (`usage-limits`, left), commands and the
   machine (`my-status`), a **resource meter** (`resources`, 150px: activity icon, `CPU 12% · 3.8 GB`)
   and a **live ports** count button (`live-ports`, 64px).
@@ -172,8 +172,8 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
 
 ## Built from
 
-`layouts/orca.json` and 23 mods in `mods/`. Shipped mods it uses as-is: `workspace-chrome`, `files`,
-`changes`, `pane`, `confirm`, `picker`, `machine-add`. Installed separately from munza/herdr-mods:
+`layouts/orca.json` and 25 mods in `mods/`. Shipped mods it uses as-is: `workspace-chrome`, `files`,
+`changes`, `pane`, `confirm`, `picker`, `machine-add`. Vendored from munza/herdr-mods, unmodified:
 `better-changes` (the `changes` slot, `"place": "none"`) and `better-config`.
 
 - `orca-sidebar` (munza's Better Sidebar, modified; views by `props.view`: spaces, `agents`,

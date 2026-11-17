@@ -277,14 +277,5 @@ else
   echo "herdr-app not on PATH: run herdr-app check on each installed mod yourself."
 fi
 
-optional_missing=""
-for name in better-changes better-config; do
-  [ -d "$HOME_DIR/mods/$name" ] || optional_missing="$optional_missing $name"
-done
-if [ -n "$optional_missing" ]; then
-  echo "Still to add (this repo doesn't bundle them):$optional_missing"
-  echo "  Ask your Herdr agent: Add this mod: https://github.com/munza/herdr-mods/tree/main/better-changes (in the layout's Changes slot)"
-  echo "  Ask your Herdr agent: Add this mod: https://github.com/munza/herdr-mods/tree/main/better-config"
-fi
 [ -n "$keys_conflicts" ] && echo "Keys you kept are listed above; take the package's binding by editing $HOME_DIR/keys.json."
 echo "Done. Switch with: herdr-app do layout.switch '{\"name\":\"orca\"}'  (ctrl-shift-l switches back)"
