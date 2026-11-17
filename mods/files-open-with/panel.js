@@ -8,11 +8,20 @@ import { syntaxColors, languageFor } from "./syntax.js";
 import { available, menuHeight } from "./items.js";
 import ICONS from "./icons.js";
 
+// The tree follows the focused terminal's folder. When focus moves to a pane without
+// one (a viewer tab, a dialog), it stays at this space's last terminal folder instead
+// of jumping to the space's own folder — which can be an unrelated project.
+const LAST_CWD = new Map();
 function location() {
   const space = spaces().find(s => s.active), f = focused();
   const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
   const on = f?.pane === null ? (f.terminal?.includes("/") ? f.terminal.split("/")[0] : null) : space?.machine ?? null;
-  return { cwd: pane?.cwd || f?.cwd || space?.folder, on, space: space?.id };
+  const cwd = pane?.cwd || f?.cwd || null;
+  if (cwd) {
+    if (space) LAST_CWD.set(space.id, cwd);
+  } else if (space) cwd = LAST_CWD.get(space.id) || space.folder;
+  else cwd = space?.folder;
+  return { cwd, on, space: space?.id };
 }
 const key = () => JSON.stringify(location());
 const PER_FOLDER = 500, TOTAL = 5000;
