@@ -29,9 +29,10 @@ if [ "$WITH_SKILLS" = 1 ] && [ ! -f skills/herdr-cowork/SKILL.md ]; then
   echo "skills/herdr-cowork/SKILL.md missing from the repo"; exit 1
 fi
 say() { if [ "$DRY" = 1 ]; then echo "[dry] $*"; else echo "$*"; fi; }
-# The home copies carry files the app writes itself (type files, jsconfig, caches): they
-# don't count as a difference.
-same() { diff -rq -x gpui-kit.d.ts -x jsconfig.json -x .DS_Store -x .cache "$1" "$2" >/dev/null 2>&1; }
+# The home copies carry files the app writes itself (type files, jsconfig, caches), and
+# CHANGES.md lives in the repo only (sync.sh) — the same set sync.sh leaves out, so a
+# "kept, differs" never means only those: none of them count as a difference.
+same() { diff -rq -x gpui-kit.d.ts -x herdr.d.ts -x jsconfig.json -x node_modules -x .cache -x .DS_Store -x CHANGES.md "$1" "$2" >/dev/null 2>&1; }
 
 install_mods=""
 kept_mods=""
@@ -50,13 +51,20 @@ for mod in mods/*/; do
   fi
 done
 
+# The app stamps a cloned_from on the home layout; sync.sh strips it, so compare without it.
+layout_tmp=""
 if [ ! -e "$HOME_DIR/layouts/orca.json" ]; then
   install_layout=1
-elif [ "$YES" = 1 ] || cmp -s layouts/orca.json "$HOME_DIR/layouts/orca.json"; then
-  install_layout=1
 else
-  install_layout=0
-  kept_layout=1
+  layout_tmp=$(mktemp)
+  trap 'rm -f "$layout_tmp"' EXIT
+  jq 'del(.cloned_from)' "$HOME_DIR/layouts/orca.json" > "$layout_tmp" 2>/dev/null || cp "$HOME_DIR/layouts/orca.json" "$layout_tmp"
+  if [ "$YES" = 1 ] || cmp -s layouts/orca.json "$layout_tmp"; then
+    install_layout=1
+  else
+    install_layout=0
+    kept_layout=1
+  fi
 fi
 
 # keys.json is merged, not replaced: new sections and keys are added, an action you
@@ -70,7 +78,7 @@ else
   merged=$(mktemp)
   cp "$HOME_DIR/keys.json" "$merged"
   entries=$(mktemp)
-  trap 'rm -f "$merged" "$entries"' EXIT
+  trap 'rm -f "$merged" "$entries" "$layout_tmp"' EXIT
   for section in $(jq -r 'keys_unsorted[]' keys.json); do
     jq -r --arg s "$section" '.[$s] | to_entries[] | "\(.key)	\(.value | tojson)"' keys.json > "$entries"
     while IFS="	" read -r key value; do
