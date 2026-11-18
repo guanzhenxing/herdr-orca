@@ -4,7 +4,9 @@
 //   icon   menu-<icon>.svg in this folder: square-pen, file-text, search, folder, files
 //   app    a macOS app name: runs `open -a <app> <path>`; hidden when the app isn't installed
 //   argv   or your own command: (path) => [program, ...args], run on this Mac without a shell
+//   mod    or a mod pane: pane.split with props {file, fileOn} (the image viewer, say)
 //   when   "file" or "dir" to show it for only one kind (default: both)
+//   image  true: shown only when the path looks like an image file
 //   local  true: hidden for files on another machine (the command needs the file on this Mac).
 //          App items are always local.
 //
@@ -17,9 +19,13 @@
 
 import { exec } from "herdr";
 
+// Extensions the image-viewer mod can show.
+const IMAGE_RE = /\.(png|jpe?g|gif|webp|bmp|ico|svg|avif)$/i;
+
 export const ITEMS = [
   { label: "Open in VS Code", icon: "square-pen", app: "Visual Studio Code" },
   { label: "Open in Preview", icon: "file-text", app: "Preview", when: "file" },
+  { label: "Open in Image Viewer", icon: "file-text", mod: "image-viewer", when: "file", image: true, local: true },
   { label: "Quick Look", icon: "search", argv: p => ["qlmanage", "-p", p], when: "file", local: true },
   { label: "Open with default app", icon: "file-text", argv: p => ["open", p], local: true },
   { label: "Reveal in Finder", icon: "folder", argv: p => ["open", "-R", p], local: true },
@@ -63,6 +69,7 @@ export async function available(target) {
   return ITEMS.map((it, i) => [it, i])
     .filter(([it]) => !it.when || it.when === (target.dir ? "dir" : "file"))
     .filter(([it]) => !(target.on && (it.local || it.app)))
+    .filter(([it]) => !it.image || IMAGE_RE.test(target.path ?? ""))
     .filter(([it]) => !it.app || apps.has(it.app))
     .map(([, i]) => i);
 }

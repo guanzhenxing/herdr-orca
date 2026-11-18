@@ -4,7 +4,7 @@
 
 import { div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { props, closeOverlay, theme, exec, notify } from "herdr";
+import { props, run, closeOverlay, theme, exec, notify } from "herdr";
 import { ITEMS, argvOf } from "./items.js";
 
 // A plain class: main.js (the View) owns it and forwards init and render.
@@ -23,6 +23,11 @@ export default class Menu {
     const p = props(), it = this.list()[i];
     if (!it) return;
     closeOverlay(p.overlay);
+    // A mod item opens the file in a mod pane beside this one, not a program.
+    if (it.mod) {
+      run("pane.split", { direction: "right", mod: it.mod, props: { file: p.path, fileOn: p.on } });
+      return;
+    }
     const [cmd, ...args] = argvOf(it, p.path);
     // Not awaited by the menu: Quick Look runs until its window is closed.
     exec(cmd, args).then(

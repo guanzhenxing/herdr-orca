@@ -1,18 +1,27 @@
 // Opens a file in a viewer tab of a space, reusing the tab that already shows it.
 // tab.new returns nothing, so the new tab is found by diffing the space's tabs.
+// An image goes to the image-viewer mod instead — the text viewer can't show
+// one — and only a local file: image-viewer can't read another machine's yet.
 import { spaces, panes, shared, setShared, run } from "herdr";
 
 const KEY = "files-open-with.tabs";
+const IMAGE_RE = /\.(png|jpe?g|gif|webp|bmp|ico|svg|avif)$/i;
 let pending = null;
 
-const alive = tab => panes().some(p => p.tab === tab && p.mod === "files-open-with");
+const alive = tab => panes().some(p => p.tab === tab && (p.mod === "files-open-with" || p.mod === "image-viewer"));
 const tabIds = space => new Set(spaces().find(s => s.id === space)?.tabs.map(t => t.id) ?? []);
 
 export function openFile({ file, on = null, space }, cx) {
+  const image = !on && IMAGE_RE.test(file ?? "");
   const key = `${space}|${on ?? ""}|${file}`, tab = (shared(KEY) ?? {})[key];
   if (tab && alive(tab)) return run("tab.select", { id: tab });
   pending = { key, space, before: tabIds(space) };
-  run("tab.new", { name: file.split("/").pop(), ...(space ? { space } : {}), mod: "files-open-with", props: { role: "viewer", file, on } });
+  run("tab.new", {
+    name: file.split("/").pop(),
+    ...(space ? { space } : {}),
+    mod: image ? "image-viewer" : "files-open-with",
+    props: image ? { file } : { role: "viewer", file, on },
+  });
   track(cx, 40);
 }
 
