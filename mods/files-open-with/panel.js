@@ -25,7 +25,7 @@ function location() {
   return { cwd, on, space: space?.id };
 }
 const key = () => JSON.stringify(location());
-const PER_FOLDER = 500, TOTAL = 5000;
+const PER_FOLDER = 500, TOTAL = 5000, RETRY_AFTER = 500, STALE_AFTER = 30000;
 
 // Material icons: icons.js is a copy of file-icons' table; the SVGs stay in that mod.
 const ICON_DIR = "mods/file-icons/icons";
@@ -46,16 +46,23 @@ function icon(path, dir, open, dark) {
   return `${ICON_DIR}/${id ?? ICONS.file}.svg`;
 }
 
-async function directory(path, on) {
+// Listing runs through a shell, so it can fail for a passing moment (folder swapped
+// under us, the process killed): one quiet retry, then the error carries the exit
+// code, since these commands fail silently.
+async function directory(path, on, cx) {
   if (!on && window()?.platform === "windows") {
-    const r = await exec("powershell", ["-NoProfile", "-Command", "& { param($p) @(Get-ChildItem -LiteralPath $p -Force -ErrorAction Stop | Where-Object Name -ne '.git' | Select-Object -First 501 | ForEach-Object { @{ name=$_.Name; dir=($_.PSIsContainer -and -not ($_.Attributes -band [IO.FileAttributes]::ReparsePoint)); link=[bool]($_.Attributes -band [IO.FileAttributes]::ReparsePoint) } }) | ConvertTo-Json -Compress } '" + path.replaceAll("'", "''") + "'"]);
-    if (r.code !== 0) throw new Error(r.stderr || "Cannot list this folder");
+    const run = () => exec("powershell", ["-NoProfile", "-Command", "& { param($p) @(Get-ChildItem -LiteralPath $p -Force -ErrorAction Stop | Where-Object Name -ne '.git' | Select-Object -First 501 | ForEach-Object { @{ name=$_.Name; dir=($_.PSIsContainer -and -not ($_.Attributes -band [IO.FileAttributes]::ReparsePoint)); link=[bool]($_.Attributes -band [IO.FileAttributes]::ReparsePoint) } }) | ConvertTo-Json -Compress } '" + path.replaceAll("'", "''") + "'"]);
+    let r = await run();
+    if (r.code !== 0 && cx) { await cx.sleep(RETRY_AFTER); r = await run(); }
+    if (r.code !== 0) throw new Error(r.stderr || `Cannot list this folder (exit ${r.code})`);
     const result = JSON.parse(r.stdout || "[]");
     return Array.isArray(result) ? result : [result];
   }
   const script = 'n=0; for p in "$1"/* "$1"/.[!.]* "$1"/..?*; do [ -e "$p" ] || [ -L "$p" ] || continue; name=${p##*/}; [ "$name" = .git ] && continue; if [ -L "$p" ]; then kind=l; elif [ -d "$p" ]; then kind=d; else kind=f; fi; printf "%s\\0%s\\0" "$kind" "$name"; n=$((n+1)); [ "$n" -gt 500 ] && break; done; test -d "$1"';
-  const r = await exec("sh", ["-c", script, "files", path], { on });
-  if (r.code !== 0) throw new Error(r.stderr || "Cannot list this folder");
+  const run = () => exec("sh", ["-c", script, "files", path], { on });
+  let r = await run();
+  if (r.code !== 0 && cx) { await cx.sleep(RETRY_AFTER); r = await run(); }
+  if (r.code !== 0) throw new Error(r.stderr || `Cannot list this folder (exit ${r.code})`);
   const fields = r.stdout.split("\0"), out = [];
   for (let i = 0; i + 1 < fields.length; i += 2) out.push({ name: fields[i + 1], dir: fields[i] === "d", link: fields[i] === "l" });
   return out;
@@ -84,16 +91,20 @@ export default class Panel {
     return this.context === context && key() === context.key;
   }
 
-  async loadFolder(path, context) {
+  async loadFolder(path, context, run, cx) {
     const { on, cwd: root } = context;
-    const entries = await directory(path ? `${root}/${path}` : root, on);
-    if (!this.current(context) || (path && !this.folders.has(path))) return;
+    const entries = await directory(path ? `${root}/${path}` : root, on, cx);
+    if (run !== this.run || !this.current(context) || (path && !this.folders.has(path))) return;
     const used = [...this.entries.entries()].filter(([p]) => p !== path).reduce((n, [, e]) => n + e.length, 0);
     this.entries.set(path, entries.slice(0, Math.max(0, Math.min(PER_FOLDER, TOTAL - used))).sort((a, b) => Number(b.dir) - Number(a.dir) || a.name.localeCompare(b.name)));
     if (entries.length > PER_FOLDER || used + entries.length > TOTAL) this.limited = true;
   }
 
-  refresh(cx) {
+  // `force` is the header's refresh button: it takes over even mid-listing. A run that
+  // wedges (an exec that never answers) would otherwise hold `loading` forever — every
+  // timer tick would bail and the panel would freeze on its last state, error included.
+  // After STALE_AFTER a timed refresh takes over too; `this.run` retires the loser's writes.
+  refresh(cx, { force = false } = {}) {
     const { cwd, on } = location(), next = key();
     if (next !== this.context?.key) {
       if (this.context) this.saved.set(this.context.key, { folders: this.folders, file: this.file });
@@ -103,15 +114,15 @@ export default class Panel {
       this.loading = false;
       if (saved?.file) this.show(saved.file, cx);
     }
-    if (!cwd || this.loading) return;
-    const context = this.context;
-    this.loading = true;
+    if (!cwd || (this.loading && !force && Date.now() - this.loadingAt < STALE_AFTER)) return;
+    const context = this.context, run = this.run = {};
+    this.loading = true; this.loadingAt = Date.now();
     this.limited = false;
     cx.spawn(async cx => {
       try {
         for (const path of ["", ...this.folders]) {
-          if (!this.current(context)) return;
-          await this.loadFolder(path, context);
+          if (run !== this.run || !this.current(context)) return;
+          await this.loadFolder(path, context, run, cx);
         }
         const top = await exec("git", ["rev-parse", "--show-toplevel"], { cwd, on }).catch(() => null);
         const marks = {}, ignored = new Set();
@@ -127,11 +138,18 @@ export default class Panel {
             marks[file] = xy === "??" || xy.includes("A") ? "A" : xy.includes("U") ? "U" : xy.includes("D") ? "D" : "M";
           }
         }
-        if (!this.current(context)) return;
+        if (run !== this.run || !this.current(context)) return;
         this.marks = marks; this.ignored = ignored; this.error = null; this.watch(cwd, cx);
-      } catch (e) { if (this.current(context)) this.error = String(e); }
-      finally { if (this.context === context) this.loading = false; cx.notify(); }
+      } catch (e) { if (run === this.run && this.current(context)) this.error = String(e); }
+      finally { if (run === this.run) this.loading = false; cx.notify(); }
     });
+  }
+
+  // One spin is always a full turn so the click is seen; a listing still running holds it.
+  stopSpinningWhenRead(cx) {
+    if (this.loading) { cx.timer.after(900, cx => this.stopSpinningWhenRead(cx)); return; }
+    this.spinning = false;
+    cx.notify();
   }
 
   toggle(path, cx) {
@@ -146,7 +164,7 @@ export default class Panel {
         const context = this.context;
         this.pending.add(path);
         cx.spawn(async cx => {
-          try { await this.loadFolder(path, context); }
+          try { await this.loadFolder(path, context, this.run, cx); }
           catch (e) { if (this.current(context)) this.error = String(e); }
           finally { if (this.context === context) this.pending.delete(path); cx.notify(); }
         });
@@ -226,7 +244,23 @@ export default class Panel {
         .child(div().font_semibold().child("Files"))
         .child(div().id("files-current").flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim)
           .on_mouse_down("right", (_e, cx) => { cx.stop_propagation(); if (this.root) this.menu(this.file ? `${this.root}/${this.file}` : this.root, !this.file, cx); })
-          .child(this.file ?? this.root?.split(/[\\/]/).pop() ?? "")))
+          .child(this.file ?? this.root?.split(/[\\/]/).pop() ?? ""))
+        // Like Changes' header button: spins while a listing runs, forces a refresh on click.
+        .child(div().id("files-refresh").size(26).flex_none().flex().items_center().justify_center().rounded(6).cursor_pointer().text_color(t.dim)
+          .tooltip("Refresh").accessibility_label("Refresh")
+          .hover(s => s.bg(t.hover).text_color(t.foreground))
+          .on_click((_e, cx) => {
+            cx.stop_propagation();
+            this.refresh(cx, { force: true });
+            // The listing often answers in milliseconds, so loading flips back before any
+            // render would show the spin: hold it for a full turn, longer if still loading.
+            if (this.spinning) return;
+            this.spinning = true;
+            cx.notify();
+            cx.timer.after(900, cx => this.stopSpinningWhenRead(cx));
+          })
+          .child(this.spinning ? svg("mods/files-open-with/refresh.svg").size(14).flex_none().text_color(t.dim).spin(900)
+            : svg("mods/files-open-with/refresh.svg").size(14).flex_none().text_color(t.dim))))
       .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6).children(this.rows("", 0, [], t, dark))
         .when(Boolean(this.error) || !this.entries.get("")?.length, el => el.child(div().p(8).text_size(12).text_color(t.dim).child(this.error || (this.loading ? "Loading files…" : this.root ? "No files" : "No folder"))))
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))
