@@ -102,7 +102,9 @@
 > 本地推导**——`tint` 单色 glyph 画前景色，其余 `image()` 原样（渐变/彩色图标走
 > 这条，codex 即恢复正常蓝紫渐变）。
 
-来源进度区与会话行的代理标签改用**正式程序图标**，与启动菜单同源同规则；程序表
+显示名同样与启动菜单一致：优先取 `knownAgents` 的官方 `name`（Claude Code /
+oh-my-pi 等），`omp` 经 `NAME_ALIASES` 别名到 `oh-my-pi`（名称与图标一并生效）；
+搜索匹配也包含官方名。来源进度区与会话行的代理标签改用**正式程序图标**，与启动菜单同源同规则；程序表
 没有的 OMP/ZCode 用 mod 内 `icons/omp.svg`（Herdr 自带，tint 绘制）与
 `icons/zcode.svg`（同仓库 usage-limits 的 ZCode 品牌图），都没有时回退字母块。
 行内缩进 44 → 24 px。

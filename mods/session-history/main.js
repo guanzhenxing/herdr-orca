@@ -47,6 +47,11 @@ const LOCAL_ICONS = {
   zcode: { file: "zcode.svg" }, // multicolor brand mark
 };
 
+// Store ids that differ from the program table's key: the table names the
+// omp CLI "oh-my-pi" (official name, and its icon); sources/rows should show
+// exactly what the launcher menu shows.
+const NAME_ALIASES = { omp: ["oh-my-pi"] };
+
 const scopeOf = () => SCOPES.find((s) => s.id === shared("session-history.scope")) ?? SCOPES[2];
 const agentsOf = () => {
   const raw = shared("session-history.agents");
@@ -256,7 +261,7 @@ export default class SessionHistory extends View {
   }
 
   agentGlyph(id, t, size = 16) {
-    const known = this.icons[id];
+    const known = this.knownOf(id);
     if (known) return this.programIcon(known, t, size);
     // not in the program table: fall back to this mod's bundled brand marks
     const local = LOCAL_ICONS[id];
@@ -265,7 +270,24 @@ export default class SessionHistory extends View {
       if (local.tint) return svg(`mods/session-history/icons/${local.file}`).size(size).flex_none().text_color(t.foreground);
       return image(`mods/session-history/icons/${local.file}`).size(size).flex_none();
     }
-    return this.programIcon({ key: id, label: (AGENTS.find((a) => a.id === id) ?? {}).label ?? id }, t, size);
+    return this.programIcon({ key: id, label: this.agentName(id) }, t, size);
+  }
+
+  // The program-table entry for a store id, following NAME_ALIASES.
+  knownOf(id) {
+    const direct = this.icons[id];
+    if (direct) return direct;
+    for (const alt of NAME_ALIASES[id] ?? []) {
+      if (this.icons[alt]) return this.icons[alt];
+    }
+    return null;
+  }
+
+  // Official display name, exactly as the launcher menu shows it.
+  agentName(id) {
+    const known = this.knownOf(id);
+    if (known?.name) return known.name;
+    return (AGENTS.find((a) => a.id === id) ?? {}).label ?? id;
   }
 
   watchRoots() {
@@ -431,7 +453,7 @@ export default class SessionHistory extends View {
       if (allow.size && !allow.has(s.agent)) return false;
       if (scope.id === "spaces" && !this.assignSpace(s, ctx)) return false;
       if (!q) return true;
-      const hay = `${s.agent} ${s.folder || ""} ${s.cwd || ""} ${s.preview || ""} ${s.first_prompt || ""} ${s.model || ""} ${s.id || ""}`.toLowerCase();
+      const hay = `${s.agent} ${this.agentName(s.agent)} ${s.folder || ""} ${s.cwd || ""} ${s.preview || ""} ${s.first_prompt || ""} ${s.model || ""} ${s.id || ""}`.toLowerCase();
       return hay.includes(q);
     });
   }
@@ -534,7 +556,7 @@ export default class SessionHistory extends View {
             cx.notify();
           })
           .child(logo)
-          .child(div().flex_1().child(a.label))
+          .child(div().flex_1().child(this.agentName(a.id)))
           .when(on, (el) => el.child(svg("mods/workspace-chrome/check.svg").size(14).flex_none().text_color(t.foreground)));
       }));
   }
@@ -759,7 +781,7 @@ export default class SessionHistory extends View {
       .children(rows.map(([id, v]) => {
         const pct = v.total > 0 ? Math.min(1, v.indexed / v.total) : 0;
         const full = v.indexed >= v.total;
-        const label = (AGENTS.find((a) => a.id === id) ?? {}).label ?? id;
+        const label = this.agentName(id);
         return h_flex()
           .id(`sh-src-${id}`)
           .h(18)
