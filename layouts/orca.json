@@ -219,6 +219,7 @@
     {
       "id": "status-row",
       "type": "row",
+      "background": "chrome",
       "children": [
         {
           "id": "usage-limits",
@@ -266,6 +267,16 @@
           },
           "size": {
             "px": 64
+          }
+        },
+        {
+          "id": "keep-awake",
+          "type": "block",
+          "content": {
+            "mod": "keep-awake"
+          },
+          "size": {
+            "px": 96
           }
         },
         {
