@@ -1,271 +1,136 @@
 # oh-my-herdr
 
-A Herdr layout after the Orca desktop app: a left sidebar of projects with their worktrees nested
-under them and each one's agents and sub-agents nested under that, spaces you can put to sleep and
-wake, branch/issue/PR badges and a hover card per worktree; tabs as pills with a run button;
-framed panes with headers; a hideable right panel with Files and Git changes; and a status bar with
-Claude/Codex usage limits and live ports. GitHub issues and PRs open in-app, and new worktrees come
-from a branch, an issue, a PR or a new name.
+一个参照 Orca 桌面应用设计的 Herdr 布局：左侧栏是项目，worktree 嵌套在项目之下，各自的 agent 和子代理再嵌套其下；space 可以休眠和唤醒；带分支/issue/PR 徽章和每个 worktree 的悬停卡片；tab 以药丸样式呈现并带运行按钮；带边框的 pane 配头部；右侧有一个可隐藏的面板，放 Files 和 Git changes；状态栏显示 Claude/Codex 用量窗口和实时端口。GitHub issues 和 PR 在应用内打开，新 worktree 可从分支、issue、PR 或新名字创建。
 
 ![oh-my-herdr](preview.png)
 
-## What you see
+## 你会看到
 
-Left to right, top to bottom. No system title bar (`"titlebar": "none"`); macOS traffic lights sit
-at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×12 padding.
+从左到右、从上到下。无系统标题栏（`"titlebar": "none"`）；macOS 红绿灯按钮位于侧栏之上 12,16 处。根背景是 `canvas`；终端内边距 14×12。
 
-- **Sidebar** (268px, 44–480, foldable with `cmd-b`):
-  - `brand` (46px): Herdr's `workspace-chrome` brand row.
-  - `sidebar-nav` (70px): Orca-style links, **Automations** and **Issues**, each
-    opening its mod as a popup (`automations`, `issues`).
-  - **Spaces** (`oh-my-sidebar`): one section per machine (a 30px bar: chevron, monitor or
-    server icon, bold name, a green dot while connected, **+**; a 1px rule above every machine but
-    the first), and inside it your **folders** (tinted blocks: chevron, colored folder icon, name,
-    count, **⋯**), then the spaces in no folder at the same indent. A repo's main checkout lists its worktrees under it (`├─`/`└─` with a branch icon).
-    Each row has a second line: branch, `primary` badge on a main checkout, ↑/↓ when active, then a
-    plug icon when it has live ports, the linked issue (green circle `#243`, purple when closed) and
-    its PR (state icon `#453`, green open, red closed/failed, purple merged, grey draft).
-    Under each space or worktree, its **agents** (26px rows lined up with its name: program icon,
-    tab name, time in this state, status) and their **sub-agents** (24px rows on tree lines, any
-    depth) — always on.
-  - **Agents** tab (`oh-my-sidebar`, `view: agents`): the sidebar's lists are two tabs sharing the
-    full height — **Spaces | Agents** in a segmented tab bar each view draws in its own header
-    (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
-    header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
-    main space, prefix); groups separate by their headers alone, like the Spaces list's sections.
-    A footer (`view: footer`): **Settings** and **Mod settings** (the vendored `better-config`) as
-    icon buttons at the left (tooltips name them), "3 agents · 2 need you" at the right, Add machine.
-  - A space put to sleep shows a moon and **Asleep** on its second line.
-- **Tab bar** (42px): the sidebar restore toggle, shown only while the sidebar is hidden (when it
-  shows, Herdr's brand button covers the hiding, so exactly one toggle is on screen at a time; a
-  rail from Herdr's brand button becomes a hide), `my-tabs` pills for the space's tabs; a **▶ Dev | ▾** run button
-  (`t3-actions`, 108px); the right-panel toggle (36px).
-- **Main**: the active tab's panes as cards (radius 10, gap 8, 1px `border`, `accent` when focused,
-  framed even when alone) with a 30px `my-pane` header: program icon, agent name, folder, status,
-  and split/zoom/close on the right.
-- **Right panel** (368px, 280–900, hidden until toggled): a stack of **Files** (`files-open-with`)
-  and **Changes** (the vendored `better-changes`).
-- **Status bar** (28px): Claude Code / Codex usage windows (`usage-limits`, left), commands and the
-  machine (`my-status`), a **resource meter** (`resources`, 150px: activity icon, `CPU 12% · 3.8 GB`)
-  and a **live ports** count button (`live-ports`, 64px).
-- A 0px block runs `hibernate` (draws nothing; its dialogs are overlays).
-- A 0px block runs `desktop-notifications` (draws nothing).
+- **侧栏**（268px，44–480，`cmd-b` 折叠）：
+  - `brand`（46px）：Herdr 的 `workspace-chrome` 品牌行。
+  - `sidebar-nav`（70px）：Orca 风格的链接，**Automations** 和 **Issues**，各自以弹窗打开其 mod（`automations`、`issues`）。
+  - **Spaces**（`oh-my-sidebar`）：每台机器一个分节（30px 横条：折叠箭头、显示器或服务器图标、粗体名称、连接时显示绿点、**+**；除第一台外每台机器上方一条 1px 分隔线），其内是你的**文件夹**（着色块：折叠箭头、彩色文件夹图标、名称、计数、**⋯**），未归入文件夹的 space 以同级缩进列在文件夹之后。一个仓库的主 checkout 会把它的 worktree 列在下方（`├─`/`└─` 加分支图标）。
+    每行有第二行信息：分支、主 checkout 上的 `primary` 徽章、活跃时的 ↑/↓，有实时端口时的插头图标、关联 issue（绿圈 `#243`，关闭为紫色）及其 PR（状态图标 `#453`，打开为绿色，关闭/失败为红色，合并为紫色，草稿为灰色）。
+    在每个 space 或 worktree 下方是它的 **agent**（26px 行，与名称对齐：程序图标、tab 名称、处于该状态的时长、状态）和它们的**子代理**（24px 行，沿树线排布，任意深度）——始终显示。
+  - **Agents** 标签（`oh-my-sidebar`，`view: agents`）：侧栏的两个列表是共享全高的两个标签——每个视图在自己的头部绘制 **Spaces | Agents** 分段标签栏（激活实色，未激活灰暗；对 `sidebar-lists` 堆栈用 `layout.select`）。Spaces 标签的头部保留 New folder / New space；Agents 标签的头部保留排序菜单（priority、grouped、main space、prefix）；分组只靠各自的组头区分，如同 Spaces 列表的分节。
+    一个页脚（`view: footer`）：左侧 **Settings** 和 **Mod settings**（即收编的 `better-config`）两个图标按钮（tooltip 标明名称），右侧「3 agents · 2 need you」，再加 Add machine。
+  - 休眠中的 space 在第二行显示月亮和 **Asleep**。
+- **Tab 栏**（42px）：侧栏恢复开关，仅在侧栏隐藏时显示（显示侧栏时，Herdr 的品牌按钮负责隐藏，保证屏上同一时刻只有一个开关；点 Herdr 品牌按钮出现的竖条变成隐藏），space 各 tab 的 `my-tabs` 药丸；一个 **▶ Dev | ▾** 运行按钮（`t3-actions`，108px）；右面板开关（36px）。
+- **主区**：活动 tab 的 pane 以卡片呈现（圆角 10，间距 8，1px `border`，聚焦时 `accent`，单独时也有边框），配 30px 的 `my-pane` 头部：程序图标、agent 名称、目录、状态，右侧是分屏/缩放/关闭。
+- **右面板**（368px，280–900，切换前隐藏）：**Files**（`files-open-with`）与 **Changes**（收编的 `better-changes`）的堆栈。
+- **状态栏**（28px）：Claude Code / Codex 用量窗口（`usage-limits`，左侧）、命令与机器（`my-status`）、**资源占用表**（`resources`，150px：活动图标、`CPU 12% · 3.8 GB`）和**实时端口**计数按钮（`live-ports`，64px）。
+- 一个 0px 块运行 `hibernate`（不画任何东西；它的对话框是 overlay）。
+- 一个 0px 块运行 `desktop-notifications`（不画任何东西）。
 
-Popups and dialogs: the Issues table (92% × 90%, frameless), the issue/PR viewer (86% × 90%), the
-worktree hover card (340px window beside the row), **Create worktree** (560 × 780), Add project,
-Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context menus (`my-menu`).
+弹窗与对话框：Issues 表格（92% × 90%，无边框）、issue/PR 查看器（86% × 90%）、worktree 悬停卡片（行旁的 340px 窗口）、**Create worktree**（560 × 780）、Add project、Project settings、Excalidraw（cmd-shift-e）、Open in VS Code（cmd-g）以及右键菜单（`my-menu`）。
 
-## How it behaves
+## 行为
 
-- **Agent status** is Herdr's: blocked and done show on spaces, tabs, agents and pane headers
-  (working spinner, "Needs you", done dot, idle ring); desktop notifications mirror "needs you" and
-  "finished".
-- **Agents in spaces**: clicking an agent focuses its pane; a sub-agent focuses its pane if it has
-  one, else opens a peek. An agent's chevron folds its sub-agents (folded: their count, in the most
-  urgent one's color). A repo row's chevron folds its worktrees and all their agents together; other
-  rows show a chevron on hover that folds their agents. A folded row's second line says "2 agents ·
-  3 sub" with the most urgent status ("Needs you" in full). An agent whose folded sub-agent needs
-  you shows "Needs you" itself, so folding never hides it. A sub-agent kept as a pane is listed only under its parent.
-  `agent.next` / `agent.prev` follow the spaces list's order, top to bottom, Agents panel or not.
-  `cmd-]` / `cmd-[` (`oh-my-sidebar.next-agent` / `prev-agent`) step through the same list, sub-agents
-  under their parent: Herdr's own `agent.next` steps from a focused sub-agent as if it were its
-  parent, so it can't get past one. The
-  footer's orange "N need you" goes to the first agent that needs you. The collapsed rail shows no
-  agent rows, only each space's status.
-- **Spaces**: click selects, drag reorders within a machine, right-click opens `my-menu`.
-- **Folders**: any space or repo (a repo with its worktrees) can be filed. Drag it onto a folder
-  header (highlighted; a folded one opens after 650ms), beside a row in another folder (it moves
-  and joins that folder), onto the dashed "Drop here to take it out of its folder" or "Drop to make
-  a new folder" targets that appear below the folders while dragging, or use the space menu's
-  **Move to folder…** (every folder, "new here" on ones this machine doesn't have yet, New folder
-  with it, Take out of folder). Folders are shared by every machine (one name, color and order)
-  but show under a machine only when they hold its spaces; an empty one shows under the machine it
-  was made on. Folding is per machine. A folded folder or machine shows "N needs you" and "N
-  working". A drag never leaves its machine: over another machine a red dashed note says it can
-  only be filed under its own. Double-click a folder to rename it; its **⋯** menu has colors,
-  Rename, Add projects, Fold the others and Delete folder (its spaces go back to the list). Going
-  to a space any way (a key, `agent.next`, a toast, a click) opens its machine, folder and repo.
-  `cmd-alt-]` / `cmd-alt-[` step through spaces in the list's order (machines, your folders, repos
-  with their worktrees, folded rows included), and the list scrolls to keep the active space on
-  screen, including after `agent.next` or a click. The list scrolls itself (wheel and a draggable
-  thumb) because Herdr can't move a native scroll area from code. Hovering a
-  repo row shows **⌄/›** (fold its worktrees, remembered; stays visible while folded), **⋯** (the
-  menu) and **+** (Create worktree for that repo). Hovering any row ~450ms opens the **hover card**:
-  Note, Pull request, Issue and Live ports sections; a row opens the viewer, icons copy the link or open
-  GitHub, a port opens in the browser; it closes 250ms after the pointer leaves row and card.
-- **Notes** (like Orca's worktree comments): the space menu's **Note…** opens one free-text note for
-  that checkout (⌘↩ saves; saving it empty removes it). A row with a note shows a note icon beside its
-  branch (the text on hover, a click edits it), and the hover card shows it first. Notes go by
-  machine and folder in shared `worktree.notes`, so one stays with its worktree when its space is
-  closed and reopened.
-  Every **+** for a new space (the Spaces header, a machine's header, "New space there", and
-  "New space" in the menu) starts it in that machine's home folder.
-- **Close & remove worktree** (space menu, or closing a worktree space's last tab): when another
-  open space on the same machine is in that checkout, the dialog turns into **Close space**: the
-  folder shows Kept, it names the other space, and only this space closes.
-- **Badges**: click opens the issue/PR viewer; ⌘-click opens GitHub.
-- **Sleep a space** (space menu → **Sleep space**, or **Sleep** in the resource meter): every program
-  in its tabs is recorded (argv, folder, and for Claude its session id from
-  `~/.claude/sessions/<pid>.json`, for Codex from its open rollout file) to
-  `data/hibernate/state.json`, then stopped: agents get an interrupt and `/exit` (`/quit` for Codex),
-  other programs SIGTERM to their process group, SIGKILL last. The shells, panes and tabs stay. A
-  working or blocked agent asks first. **Wake space** types `cd <folder> && <command>` into each idle
-  shell: `claude --resume <id>` (keeping flags like `--model`), `codex resume --no-daemon <id>`, or
-  the original command; a terminal that's gone gets a new shell in the same tab.
-- **After a restart**: every 30s the mod records what each Herdr terminal runs (written only on a
-  change). A reboot or a lost herdr-core brings kept terminals back as shells with a **new** shell
-  pid; those are offered in a dialog (a checkbox each, Resume all, Not now, "Resume automatically next
-  time"). A program you exited keeps its shell pid, so it's never offered.
-- **Settings** (Mod settings → Hibernate, `mod.schema.json`), short labels so the choice buttons
-  leave the description room: **Wake sleeping spaces**: Manual (default: the space menu or the
-  meter), On open (going to the space), On start (once per Herdr launch). **After a restart**: Ask
-  (default), Automatic, Off.
-- **Resource meter**: one `ps` every 5s (30s while the window isn't in front) sums each local
-  terminal's process tree by space, plus Herdr's own app and core. CPU is a share of all cores:
-  yellow from 30%, red from 60%; memory yellow from 30% of RAM, red from 50%. Click: spaces by
-  memory with CPU, memory and heaviest process, expanding to terminals (click one to go to it), a
-  Herdr row, and Sleep / Wake per space.
-- **Issues** (from the sidebar nav): Issues/PRs/Projects tabs (Projects: the repo's GitHub
-  Projects as a board or table, Group by, a Filter panel for iterations and fields, field edits), repo picker, filters, assignee/status menus
-  (anchored under the control), Start/Open per row. **Start** opens Create worktree with that issue
-  or PR picked, or switches to its space if one is open.
-- **Viewer**: issues and PRs. PRs get Conversation / Checks / Files changed (expand a file for its
-  diff, first 400 lines), a Pull request card (squash/merge/rebase with a confirm step, close or
-  reopen, ready for review), editable assignees, reviewers and labels, linked issues, and Start/Open
-  workspace.
-- **Create worktree**: Branch · Issue · PR · New tabs; `#123` or a GitHub link jumps to its tab.
-  Branch lists checkouts (Open), local and remote-only branches; ↻ fetches origin. Picking fills
-  editable **Branch** and **Space name**; a note under Branch says what Create will do (open, check
-  out, track origin, or a new branch from a named start). Issues use `dev/feat/{number}` (setting
-  `issue_branch` in `mods/new-worktree/mod.json`) or the branch of the open PR that closes them.
-  With Claude chosen, an issue/PR task is pasted into Claude's prompt but not sent. One create per
-  dialog. When the project has a setup script, a **Setup script** row offers **Run** / **Skip**.
-- **Worktree setup hooks**: a new worktree runs the repo's team script (`scripts.setup` in
-  `herdr.yaml`, else Orca's `orca.yaml`, first) and then the project's local setup script, with
-  `HERDR_ROOT_PATH`, `HERDR_WORKTREE_PATH`, `HERDR_WORKSPACE_NAME` (Orca's `ORCA_*` names and
-  `CONDUCTOR_ROOT_PATH` are set too, so Orca scripts run unchanged). It runs in your login shell
-  (`$SHELL -lic`), so tools your profile puts on PATH (pnpm, nvm, mise) are found. Run by default,
-  skip by default, or ask every time. "Wait for setup" runs it first and then the agent in one
-  terminal; otherwise the agent starts at once and setup runs in its own **Setup** tab, with the
-  agent's tab kept in front. It reports "Setup finished." or "Setup failed (exit N)."
-- **Project settings** (space menu → Project settings…): display name and icon (Automatic, Emoji or
-  Letter, with a colour);
-  **Worktrees**: default base branch, worktree location (instead of `~/.herdr/worktrees/<repo>`),
-  issue branch name (`{number}`, `{slug}`), default agent; **Worktree hooks**: the variables (hover
-  for what each holds), the team script (`herdr.yaml` or `orca.yaml`) read-only, the local setup script (saved on this
-  machine), **When to run** (Ask every time / Run by default / Skip by default) and **Wait for setup
-  to complete before starting agent**; and Remove project.
-- **Files**: clicking a file opens it in its own tab (Markdown rendered with a Source toggle), reusing
-  the tab already showing it; right-click opens it in your apps. Git-ignored files and folders (and
-  everything under an ignored folder) are greyed out; symlinks show a link icon after their name.
-  Code is colored by the **Code colors** setting (Mod settings): Editor (default; a soft palette for
-  light and dark), Terminal (the theme's ANSI colors) or Off. `.env`, `.env.*`, `*.env` and `.envrc`
-  highlight as shell.
-- **Changes**: staging, commit/amend, history, diffs in one centre tab (Better Changes' own docs).
-- **Automations**: scheduled agent prompts, through the `herdr-automations` CLI — vendored in
-  `cli/herdr-automations/` (MIT, see its `VENDOR.md`); `install.sh` builds or downloads it, and the
-  panel's Start banner installs a per-user scheduler service.
-- Keys (merge `keys.json`): `cmd-n` new worktree, `cmd-shift-n` add project, `cmd-g` VS Code,
-  `cmd-shift-e` Excalidraw; in this layout `cmd-shift-a` flips the sidebar's Spaces/Agents tabs, `cmd-shift-b` the right
-  panel, `cmd-alt-]` / `cmd-alt-[` next / previous space, `cmd-]` / `cmd-[` next / previous agent, `cmd-w` / `cmd-shift-w` close a tab / pane. Closing a tab by key asks first ("Close tab
-  …?", Enter confirms); the tab's ×, its menu's Close and a pane's close button don't.
+- **Agent 状态**沿用 Herdr：blocked 和 done 显示在 space、tab、agent 和 pane 头部（working 转圈、「Needs you」、done 圆点、idle 圆环）；桌面通知镜像「需要你」和「已完成」。
+- **Space 内的 agent**：点击 agent 聚焦其 pane；子代理有 pane 则聚焦，否则打开 peek。agent 的折叠箭头折叠其子代理（折叠态显示数量，用最紧急者的颜色）。仓库行的箭头把它的全部 worktree 及其下 agent 一起折叠；其他行悬停显示箭头，折叠各自 agent。折叠行的第二行显示「2 agents · 3 sub」加最紧急状态（「Needs you」完整显示）。折叠的子代理需要你时，agent 自己也会显示「Needs you」，折叠不会藏掉它。以 pane 形式保留的子代理只列在父级之下。
+  `agent.next` / `agent.prev` 沿 Spaces 列表的顺序从上到下，无论 Agents 面板开合。
+  `cmd-]` / `cmd-[`（`oh-my-sidebar.next-agent` / `prev-agent`）按同一列表步进，子代理跟随父级：Herdr 自带的 `agent.next` 从聚焦的子代理出发会当成其父级，走不过一个。页脚橙色的「N need you」跳到第一个需要你的 agent。折叠成窄条时不显示 agent 行，只显示每个 space 的状态。
+- **Spaces**：点击选中，拖拽在机器内重排，右键打开 `my-menu`。
+- **文件夹**：任何 space 或仓库（带其 worktree 的仓库）都可归档。把它拖到文件夹头上（高亮；折叠的拖近 650ms 后展开）、拖到另一文件夹内某行旁边（移动并加入该文件夹）、拖到拖动时出现在文件夹下方的虚线「Drop here to take it out of its folder」或「Drop to make a new folder」目标上，或用 space 菜单的 **Move to folder…**（列出全部文件夹，本机还没有的标「new here」，New folder 直接用它新建，Take out of folder 移出）。文件夹由所有机器共享（同一个名字、颜色和顺序），但只在其容纳该机 space 的机器下显示；空文件夹显示在创建它的机器下。折叠状态按机器记忆。折叠的文件夹或机器显示「N needs you」和「N
+  working」。拖拽不会离开所属机器：悬停在其他机器上时出现红色虚线提示只能归入自己机器的文件夹。双击文件夹重命名；其 **⋯** 菜单有颜色、Rename、Add projects、Fold the others 和 Delete folder（其中 space 回到列表）。以任何方式前往某 space（按键、`agent.next`、toast、点击）都会展开它的机器、文件夹和仓库。
+  `cmd-alt-]` / `cmd-alt-[` 按列表顺序步进 space（机器、你的文件夹、带 worktree 的仓库，含折叠行），列表会滚动保持活动 space 可见，包括 `agent.next` 或点击之后。列表自行滚动（滚轮和可拖动滑块），因为 Herdr 无法用代码移动原生滚动区。悬停仓库行显示 **⌄/›**（折叠其 worktree，状态被记住；折叠时保持可见）、**⋯**（菜单）和 **+**（为该仓库 Create worktree）。悬停任意行约 450ms 打开**悬停卡片**：Note、Pull request、Issue 和 Live ports 分节；点行打开查看器，图标复制链接或打开 GitHub，端口在浏览器打开；指针离开行和卡片 250ms 后关闭。
+- **Notes**（类似 Orca 的 worktree 评论）：space 菜单的 **Note…** 为该 checkout 打开一条自由文本备注（⌘↩ 保存；存空即删除）。有备注的行在分支旁显示备注图标（悬停显示文本，点击编辑），悬停卡片将其置顶。备注按机器和文件夹存于共享 `worktree.notes`，space 关闭再打开时仍随其 worktree。
+  每个**新建 space 的 +**（Spaces 头部、机器头部、「New space there」和菜单里的「New space」）都以该机器的 home 目录为起点。
+- **Close & remove worktree**（space 菜单，或关闭 worktree space 的最后一个 tab）：当同一机器上还有另一个打开的 space 位于该 checkout 时，对话框变为 **Close space**：文件夹显示 Kept，指名另一个 space，只关闭当前 space。
+- **徽章**：点击打开 issue/PR 查看器；⌘-点击打开 GitHub。
+- **休眠 space**（space 菜单 → **Sleep space**，或资源占用表里的 **Sleep**）：先记录其各 tab 里的每个程序（argv、目录，Claude 取
+  `~/.claude/sessions/<pid>.json` 里的会话 id，Codex 取其打开的 rollout 文件）到
+  `data/hibernate/state.json`，然后停止：agent 收到中断和 `/exit`（Codex 为 `/quit`），
+  其他程序向其进程组发 SIGTERM，最后 SIGKILL。shell、pane 和 tab 保留。working 或 blocked 的 agent 会先询问。**Wake space** 向每个空闲 shell 键入 `cd <folder> && <command>`：`claude --resume <id>`（保留 `--model` 等旗标）、`codex resume --no-daemon <id>`，或原始命令；终端已消失的，在同一 tab 里开新 shell。
+- **重启之后**：mod 每 30 秒记录每个 Herdr 终端在运行什么（有变化才写）。重启或 herdr-core 丢失后，保留的终端以**新的** shell pid 恢复为 shell；它们会出现在一个对话框里（逐个复选框、Resume all、Not now、「Resume automatically next
+  time」）。你手动退出的程序保留其 shell pid，因此永远不会被列出。
+- **设置**（Mod settings → Hibernate，`mod.schema.json`），短标签给选择按钮留出说明空间：**Wake sleeping spaces**：Manual（默认：space 菜单或占用表）、On open（前往该 space 时）、On start（每次 Herdr 启动一次）。**After a restart**：Ask（默认）、Automatic、Off。
+- **资源占用表**：每 5 秒（窗口不在前台时 30 秒）一次 `ps`，按 space 汇总每个本地终端的进程树，外加 Herdr 自身的 app 和 core。CPU 占全部核心的份额：30% 起黄色，60% 起红色；内存达 RAM 30% 起黄色，50% 起红色。点击：按内存列出 space 及其 CPU、内存和最重进程，可展开到终端（点击跳转）、一个 Herdr 行，以及每个 space 的 Sleep / Wake。
+- **Issues**（来自侧栏导航）：Issues/PRs/Projects 标签（Projects：仓库的 GitHub
+  Projects 看板或表格，Group by，迭代和字段的 Filter 面板，字段编辑）、仓库选择器、过滤器、指派/状态菜单（锚定在控件下方）、每行 Start/Open。**Start** 打开选中该 issue 或 PR 的 Create worktree，或已有 space 时直接切换过去。
+- **查看器**：issues 和 PRs。PR 有 Conversation / Checks / Files changed（展开文件看 diff，前 400 行）、Pull request 卡片（squash/merge/rebase 带确认步骤、关闭或重开、ready for review）、可编辑的指派、reviewers 和标签、关联 issues，以及 Start/Open workspace。
+- **Create worktree**：Branch · Issue · PR · New 标签；`#123` 或 GitHub 链接跳到对应标签。Branch 列出 checkout（Open）、本地与仅远程分支；↻ 拉取 origin。选择后填充可编辑的 **Branch** 和 **Space name**；Branch 下的说明会讲 Create 将做什么（打开、checkout、跟踪 origin，或从指定起点建新分支）。Issue 用 `dev/feat/{number}`（在 `mods/new-worktree/mod.json` 设 `issue_branch`）或关闭它的 PR 的分支。选择 Claude 时，issue/PR 任务粘进 Claude 的输入框但不发送。每次对话框只建一个。项目有 setup 脚本时，出现 **Setup script** 行，可选 **Run** / **Skip**。
+- **Worktree setup hooks**：新 worktree 会先跑仓库的团队脚本（`herdr.yaml` 的 `scripts.setup`，否则 Orca 的 `orca.yaml`），再跑项目的本地 setup 脚本，并设置
+  `HERDR_ROOT_PATH`、`HERDR_WORKTREE_PATH`、`HERDR_WORKSPACE_NAME`（Orca 的 `ORCA_*` 名称与
+  `CONDUCTOR_ROOT_PATH` 也会设置，Orca 脚本无需改动即可运行）。它在你的登录 shell
+  （`$SHELL -lic`）里运行，所以 profile 放上 PATH 的工具（pnpm、nvm、mise）都能找到。默认运行、默认跳过或每次询问。「Wait for setup」先跑脚本再在同一终端启动 agent；否则 agent 立即启动，setup 在自己的 **Setup** tab 里运行，agent 的 tab 保持在前。完成后报告「Setup finished.」或「Setup failed (exit N).」
+- **Project settings**（space 菜单 → Project settings…）：显示名称和图标（Automatic、Emoji 或 Letter，可配色）；
+  **Worktrees**：默认基础分支、worktree 位置（替代 `~/.herdr/worktrees/<repo>`）、issue 分支名（`{number}`、`{slug}`）、默认 agent；**Worktree hooks**：各变量（悬停看含义）、团队脚本（`herdr.yaml` 或 `orca.yaml`，只读）、本地 setup 脚本（保存在本机）、**When to run**（Ask every time / Run by default / Skip by default）与 **Wait for setup
+  to complete before starting agent**；以及 Remove project。
+- **Files**：点击文件在独立 tab 打开（Markdown 渲染显示，可 Source 切换源码），复用已在显示它的 tab；右键在你的应用中打开。被 git 忽略的文件和文件夹（及忽略文件夹下的一切）灰显；软链接在名字后显示链接图标。代码按 **Code colors** 设置（Mod settings）着色：Editor（默认；亮暗两用的柔和配色）、Terminal（主题 ANSI 色）或 Off。`.env`、`.env.*`、`*.env` 和 `.envrc`
+  按 shell 高亮。
+- **Changes**：暂存、提交/修补、历史、集中在一个 tab 的 diff（详见 Better Changes 自己的文档）。
+- **Automations**：定时的 agent 提示，经 `herdr-automations` CLI——收编在
+  `cli/herdr-automations/`（MIT，见其 `VENDOR.md`）；`install.sh` 负责构建或下载，面板的启动横幅安装按用户的调度服务。
+- 按键（合并 `keys.json`）：`cmd-n` new worktree、`cmd-shift-n` add project、`cmd-g` VS Code、
+  `cmd-shift-e` Excalidraw；本布局内 `cmd-shift-a` 切换侧栏 Spaces/Agents 标签、`cmd-shift-b` 开关右面板、`cmd-alt-]` / `cmd-alt-[` 下一个 / 上一个 space、`cmd-]` / `cmd-[` 下一个 / 上一个 agent、`cmd-w` / `cmd-shift-w` 关 tab / pane。按键关闭 tab 会先询问（「Close tab
+  …?」，Enter 确认）；tab 的 ×、其菜单的 Close 和 pane 的关闭按钮则不问。
 
-## Built from
+## 构成
 
-`layouts/oh-my-herdr.json` and 25 mods in `mods/`. Shipped mods it uses as-is: `workspace-chrome`, `files`,
-`changes`, `pane`, `confirm`, `picker`, `machine-add`. Vendored from munza/herdr-mods, unmodified:
-`better-changes` (the `changes` slot, `"place": "none"`) and `better-config`.
+`layouts/oh-my-herdr.json` 与 `mods/` 下的 25 个 mod。原样使用的 Herdr 自带 mod：`workspace-chrome`、`files`、
+`changes`、`pane`、`confirm`、`picker`、`machine-add`。自 munza/herdr-mods 收编、未修改：`better-changes`（占 `changes` 槽位，`"place": "none"`）和 `better-config`。
 
-- `oh-my-sidebar` (munza's Better Sidebar, modified; views by `props.view`: spaces, `agents`,
-  `footer`, `panel-toggle`, `card`, `groups`, `note`; `views/space-agents.js` draws agents in the spaces
-  list from `agents()` and `terminals()` (`parent`), reusing the Agents panel's helpers), `my-tabs`, `my-pane`, `my-status`, `my-menu`
-  (terminal and space menus; `terminal_menu: "my-menu"`), `my-new-menu`, `my-worktree` (remove
-  confirm): modified clones of Herdr's mods.
-- `issues` (table, viewer, `projects.js`, `pr.js`, `start.js`, `prefill.sh`), `new-worktree` (dialog, `git.js`,
-  `hooks.js`), `project-settings` (with the same `hooks.js`: keep the two copies identical),
-  `files-open-with` (+ `file-icons` for Material icons), `t3-actions`, `sidebar-nav`,
-  `automations`, `usage-limits` (`helpers/*.sh`), `live-ports`, `desktop-notifications`,
-  `hibernate` (`core.js` snapshot/stop/start, `ui.js` dialogs, `settings.js` shared with
-  `oh-my-sidebar`), `resources` (`measure.js`),
-  `new-project`, `open-vscode`, `excalidraw`.
-- Shared state keys: `live-ports`, `oh-my-sidebar.hover`, `oh-my-sidebar.inline-agents`,
-  `oh-my-sidebar.groups` (`{groups: [{id, name, color, home}], projects: {<unit>: <folder id>},
-  folds: {"<machine>|<folder id>": bool}}`; a unit is a repo's `JSON.stringify([machine, git common
-  dir])` or `space:<id>`), `oh-my-sidebar.space-parents` (a repo space's unit, read by `my-menu`; other spaces are `space:<id>`),
-  `hibernate.sleeping` (`{space: {at, count}}`), `hibernate.request` (`{nonce, action, space}`, how
-  the menu and the meter ask), `hibernate.answer` (the resume dialog's reply), `pane-heads`, `issues.pick`,
-  `issues.changed`, `projects.settings` (per `JSON.stringify([machine, main checkout])`: name, icon,
-  `base`, `location`, `issue_branch`, `issue_prompt`, `pr_prompt`, `agent`, `setup`, `setupWhen`, `setupWait`),
-  `projects.location`, `files-open-with.tabs`,
-  `better-changes.*`. Git config: `branch.<b>.herdr-issue` / `herdr-pr` = `owner/repo#N`.
-- Programs: `git`, `gh` (logged in), `curl` (avatars), `osascript`/`pbcopy`/`open` on macOS,
-  `claude` / `codex` CLIs for usage limits and resuming, `lsof` for ports and Codex sessions,
-  `ps` / `sysctl` / `kill` / `pgrep` for the resource meter and sleeping, `terminal-notifier` if
-  installed, `code` for VS Code, `herdr-automations`, `hc` and `herdr-app`.
+- `oh-my-sidebar`（munza 的 Better Sidebar，有修改；`props.view` 选视图：spaces、`agents`、
+  `footer`、`panel-toggle`、`card`、`groups`、`note`；`views/space-agents.js` 从 `agents()` 与 `terminals()`（`parent`）在 spaces 列表里绘制 agent，复用 Agents 面板的辅助函数）、`my-tabs`、`my-pane`、`my-status`、`my-menu`
+  （终端与 space 菜单；`terminal_menu: "my-menu"`）、`my-new-menu`、`my-worktree`（删除确认）：Herdr mod 的修改克隆。
+- `issues`（表格、查看器、`projects.js`、`pr.js`、`start.js`、`prefill.sh`）、`new-worktree`（对话框、`git.js`、
+  `hooks.js`）、`project-settings`（共用同一份 `hooks.js`：保持两份一致）、
+  `files-open-with`（+ Material 图标的 `file-icons`）、`t3-actions`、`sidebar-nav`、
+  `automations`、`usage-limits`（`helpers/*.sh`）、`live-ports`、`desktop-notifications`、
+  `hibernate`（`core.js` 快照/停止/启动、`ui.js` 对话框、与
+  `oh-my-sidebar` 共享的 `settings.js`）、`resources`（`measure.js`）、
+  `new-project`、`open-vscode`、`excalidraw`。
+- 共享状态键：`live-ports`、`oh-my-sidebar.hover`、`oh-my-sidebar.inline-agents`、
+  `oh-my-sidebar.groups`（`{groups: [{id, name, color, home}], projects: {<unit>: <folder id>},
+  folds: {"<machine>|<folder id>": bool}}`；unit 是仓库的 `JSON.stringify([machine, git common
+  dir])` 或 `space:<id>`）、`oh-my-sidebar.space-parents`（仓库 space 的 unit，`my-menu` 会读；其他 space 为 `space:<id>`）、
+  `hibernate.sleeping`（`{space: {at, count}}`）、`hibernate.request`（`{nonce, action, space}`，菜单与占用表的请求方式）、`hibernate.answer`（恢复对话框的应答）、`pane-heads`、`issues.pick`、
+  `issues.changed`、`projects.settings`（按 `JSON.stringify([machine, main checkout])`：name、icon、
+  `base`、`location`、`issue_branch`、`issue_prompt`、`pr_prompt`、`agent`、`setup`、`setupWhen`、`setupWait`）、
+  `projects.location`、`files-open-with.tabs`、
+  `better-changes.*`。Git 配置：`branch.<b>.herdr-issue` / `herdr-pr` = `owner/repo#N`。
+- 程序：`git`、`gh`（已登录）、`curl`（头像）、macOS 的 `osascript`/`pbcopy`/`open`、
+  用量与恢复用的 `claude` / `codex` CLI、端口和 Codex 会话的 `lsof`、
+  资源占用与休眠的 `ps` / `sysctl` / `kill` / `pgrep`、装了才用的 `terminal-notifier`、VS Code 的 `code`、`herdr-automations`、`hc` 与 `herdr-app`。
 
-## Watch out
+## 注意
 
-- Popups default to "the pointer", which Herdr doesn't track over dialogs: anchor them from the
-  pressed control's `bounds` (as `issues` does).
-- `hc wait <your own terminal>` doesn't honour `--timeout`; don't use it to sleep.
-- Claude prints a non-breaking space after `❯`; the prefill helper matches `^❯` and waits past the
-  folder-trust prompt.
-- `cx.spawn` runs synchronously until its first `await`; don't call into state the constructor
-  hasn't built yet.
-- GitHub only links "Closes #N" when the PR targets the default branch; badges also read the body
-  and the branch name.
-- Agents in spaces and the Agents panel are separate mod copies with their own `localStorage`
-  (folds, time in state); the switch keeps one of them showing (`layout.hide` / `layout.show`
-  on the `agents` block), and the layout ships with that block `"hidden": true`.
-- Scrolling slides rows under a still pointer, firing a hover per row. Those hovers must not open
-  the card or `setShared` (which redraws every mod in the window): `spaces.js` only treats a hover
-  as real when the pointer moved in the last 150ms, writes `oh-my-sidebar.hover` only while a card
-  is open, and gives the scroll area a stable `.id("spaces-list")`.
-- There's no element drag-and-drop in mods (`on_drop` is only for files from outside): a drag is
-  `on_mouse_down` on a row, then `on_mouse_move` / `on_mouse_up` on whatever is under the pointer,
-  so every drop target handles both. Reset the drag state on the list's own `on_mouse_up`, which
-  runs after the target's.
-- Opening a folder when its space becomes active is done in the 250ms data timer, not in
-  `render`: `setShared` from a render redraws every mod again.
-- `space.new` without a folder starts where the focused terminal is. From a worktree, that opens a
-  second space on the same worktree, and removing either one deletes the folder under both: always
-  pass the machine and its home (a remote's comes from `printenv HOME` there, cached), and check
-  for other spaces on the checkout before `git worktree remove`.
-- Never stop a program with ctrl+c: Herdr starts agents through `zsh -lic '"$@"; exec "$0" -li'`,
-  and SIGINT makes that wrapper abort and close the pane instead of returning to a prompt.
-- "When Herdr starts" compares Herdr.app's process start time with the last one seen, since the
-  mod also restarts on any edit or layout switch. A loss is a terminal alive at the same address
-  with a new shell pid and nothing running; terminals still being recovered are held 15 min.
-- Ticking "Resume automatically next time" writes `after_restart` into `mods/hibernate/mod.json`,
-  which reloads the mod.
-- The code view tags `//`, `/*` and string quotes as `punctuation`, which beats `comment`, and
-  only the documented syntax names take effect; so comments and punctuation share one gray
-  (`#8b949e` dark, `#6e7781` light) or a comment's slashes would differ from its text.
-- The hover card is a `window` overlay (doesn't take the keyboard); worktree badges need `gh`.
-- Remote machines: prefill falls back to the clipboard; media and watchers are local-only.
-- `herdr.yaml` / `orca.yaml` are parsed only for `scripts.setup` (one line, or a `|` / `>` block),
-  not as full YAML. `herdr.yaml` wins when both exist.
-  The setup script also runs when Create opens an existing checkout that has no space open yet.
+- 弹窗默认锚定「指针」，而 Herdr 在对话框之上不跟踪指针：从被按控件的 `bounds` 锚定（`issues` 的做法）。
+- `hc wait <自己的终端>` 不支持 `--timeout`；不要用它来 sleep。
+- Claude 会在 `❯` 后打印一个不换行空格；prefill 辅助匹配 `^❯`，并等待越过目录信任提示。
+- `cx.spawn` 在第一个 `await` 前同步执行；不要调用构造函数还没建好的状态。
+- GitHub 只在 PR 指向默认分支时才关联「Closes #N」；徽章还会读正文和分支名。
+- space 列表和 Agents 面板是两个独立 mod 拷贝，各有自己的 `localStorage`
+  （折叠、状态时长）；切换时保持其一显示（对 `agents` 块用 `layout.hide` / `layout.show`），布局出厂时该块为 `"hidden": true`。
+- 滚动会让行从静止的指针下滑过，逐行触发 hover。这些 hover 不能打开卡片或 `setShared`（那会重绘窗口内所有 mod）：`spaces.js` 只把最近 150ms 内指针移动过的 hover 当真，只在卡片打开期间写 `oh-my-sidebar.hover`，并给滚动区一个稳定的 `.id("spaces-list")`。
+- mod 里没有元素拖拽（`on_drop` 只接外部文件）：拖拽是行上的 `on_mouse_down` 加指针下元素的 `on_mouse_move` / `on_mouse_up`，所以每个放置目标两者都要处理。拖拽状态在列表自己的 `on_mouse_up` 里复位（它在目标之后执行）。
+- 「space 变为活动时展开其文件夹」放在 250ms 数据定时器里做，不放
+  `render`：在 render 里 `setShared` 会再次重绘所有 mod。
+- 不带 folder 的 `space.new` 从聚焦终端的位置启动。在 worktree 里，这会在同一 worktree 上开第二个 space，移除其中任一个会删掉两者共用的文件夹：始终传机器与其 home（远程的用当地 `printenv HOME` 查询并缓存），并在 `git worktree remove` 前检查同一 checkout 上是否还有其他 space。
+- 永远不要用 ctrl+c 停程序：Herdr 经 `zsh -lic '"$@"; exec "$0" -li'` 启动 agent，
+  SIGINT 会让包装层中止并直接关掉 pane，而不是回到提示符。
+- 「Herdr 启动时」比较 Herdr.app 进程启动时间与上次记录值，因为 mod 在任何编辑或布局切换时也会重启。一次丢失 = 同一地址上有存活终端、shell pid 是新的、且没有程序在运行；恢复中的终端会宽限 15 分钟。
+- 勾选「Resume automatically next time」会把 `after_restart` 写进 `mods/hibernate/mod.json`，这会重载该 mod。
+- 代码视图把 `//`、`/*` 和字符串引号标成 `punctuation`，优先级高于 `comment`，且只有文档列出的语法名生效；于是注释与标点共用一种灰
+  （暗色 `#8b949e`、亮色 `#6e7781`），否则注释斜杠会和正文不同色。
+- 悬停卡片是 `window` overlay（不抢键盘）；worktree 徽章需要 `gh`。
+- 远程机器：预填退回剪贴板；媒体与文件夹监视仅限本机。
+- `herdr.yaml` / `orca.yaml` 只解析 `scripts.setup`（单行，或 `|` / `>` 块），不按完整 YAML 解析。两者同时存在时 `herdr.yaml` 优先。
+  Create 打开一个还没有 space 的既有 checkout 时，setup 脚本同样会运行。
 
-## Done when
+## 完成标准
 
-- `herdr-app check` passes for every mod, `layout.switch {"name":"oh-my-herdr"}` shows it, and
-  `herdr-app status` lists no errors.
-- A repo row shows ⌄ ⋯ + on hover; + opens Create worktree on that repo.
-- An agent shows under its space or worktree; `hc run -- sleep 60` from that agent shows a nested
-  row on a tree line under it; folding the repo row hides both and its second line counts them;
-  turning the Agents switch off shows the Agents panel.
-- Picking a remote-only branch creates a tracking worktree and a space; a picked issue fills
-  `dev/feat/N` and its title; pressing ⌘↵ twice makes one space.
-- A repo with `scripts: setup: echo $HERDR_WORKTREE_PATH` in its `herdr.yaml` (or a local script in
-  Project settings) prints the new worktree's path and "Setup finished." when a worktree is created;
-  with "Wait for setup" off, it runs in a Setup tab beside the agent's.
-- A worktree with a linked issue and PR shows both badges; hovering shows the card; clicking a badge
-  opens the viewer with PR tabs and the merge card.
-- Clicking a Markdown file in Files opens it rendered in a new tab; clicking it again reuses the tab.
-- In a scratch space running `sleep 600`, Sleep space leaves an idle shell with the same pid and
-  the row says Asleep; Wake space runs `sleep 600` again there. With "When I open the space", going
-  to the sleeping space wakes it.
-- `kill -9` a test terminal's shell: herdr-core recovers it with a new pid and the resume dialog
-  lists it; a program exited by hand isn't listed.
-- The status bar shows `CPU n% · n GB`; clicking it lists spaces with Sleep buttons.
+- 每个 mod 通过 `herdr-app check`，`layout.switch {"name":"oh-my-herdr"}` 能显示，且
+  `herdr-app status` 无错误。
+- 仓库行悬停显示 ⌄ ⋯ +；+ 打开该仓库的 Create worktree。
+- agent 显示在其 space 或 worktree 之下；在该 agent 里 `hc run -- sleep 60` 会在其下树线上出现嵌套行；折叠仓库行两者都消失、第二行计入数量；关闭 Agents 开关显示 Agents 面板。
+- 选中仅远程分支会创建跟踪 worktree 和 space；选中 issue 填入 `dev/feat/N` 和标题；连按两次 ⌘↵ 建出一个 space。
+- 仓库 `herdr.yaml` 里有 `scripts: setup: echo $HERDR_WORKTREE_PATH`（或 Project settings 里的本地脚本）时，创建 worktree 会打印新 worktree 的路径和「Setup finished.」；关掉「Wait for setup」则与 agent 的 tab 并排跑在 Setup tab。
+- 关联了 issue 和 PR 的 worktree 显示两个徽章；悬停出卡片；点徽章打开带 PR 标签和合并卡片的查看器。
+- 在 Files 里点 Markdown 文件在新 tab 渲染打开；再点复用该 tab。
+- 在草稿 space 跑 `sleep 600`，Sleep space 后留下同 pid 的空闲 shell，行显示 Asleep；Wake space 在其中重新运行 `sleep 600`。「When I open the space」开启时，前往该 space 即唤醒。
+- `kill -9` 一个测试终端的 shell：herdr-core 以新 pid 恢复并出现在恢复对话框列表；手动退出的程序不出现。
+- 状态栏显示 `CPU n% · n GB`；点击列出 space 及其 Sleep 按钮。

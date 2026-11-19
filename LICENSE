@@ -199,3 +199,18 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+--------------------------------------------------------------------------------
+
+APPENDIX: Copyright and attribution.
+
+  Copyright 2026 guanzhenxing — the oh-my-herdr layout and its mods
+    (mods/agent-handoff, mods/keep-awake, mods/usage-limits, and later changes).
+  Copyright 2026 Mark Lestat Agustin (VladTemp27) — the original Orca for Herdr
+    layout this project forks and renames.
+
+Third-party components keep their own licenses and notices: see NOTICE and
+THIRD_PARTY.md at the repository root, and the LICENSE*/notice files bundled
+inside mods/excalidraw, mods/file-icons and mods/oh-my-sidebar's upstream notice
+(reproduced in NOTICE).

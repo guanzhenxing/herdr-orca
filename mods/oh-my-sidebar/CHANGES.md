@@ -1,7 +1,7 @@
 # Changes in this copy
 
 This mod is Better Sidebar 3.0.0 from [munza/herdr-mods](https://github.com/munza/herdr-mods)
-(Apache-2.0, see `licenses/` and `THIRD_PARTY.md` at the repository root), modified for the Orca layout.
+(Apache-2.0, see `NOTICE` and `THIRD_PARTY.md` at the repository root), modified for the oh-my-herdr layout.
 
 Modified files:
 

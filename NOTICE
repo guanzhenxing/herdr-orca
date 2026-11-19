@@ -1,28 +1,41 @@
-Orca for Herdr
-Copyright 2026 VladTemp27
+oh-my-herdr
+Copyright 2026 guanzhenxing
 
-This layout's mods include code adapted from Herdr Desktop's shipped mods
-(https://github.com/herdrdev/herdr-app), licensed under the Apache License, Version 2.0.
+本项目基于 Orca for Herdr（https://github.com/VladTemp27/herdr-orca），
+Copyright 2026 VladTemp27，以 Apache License 2.0 发布；在其基础上修改并更名。
 
-mods/oh-my-sidebar is Better Sidebar from munza/herdr-mods
-(https://github.com/munza/herdr-mods), Copyright 2026 Tawsif Aqib, licensed under the
-Apache License, Version 2.0, and modified here (see mods/oh-my-sidebar/CHANGES.md).
-Its NOTICE is kept in licenses/munza-herdr-mods-NOTICE.txt.
+本布局的 mods 包含改编自 Herdr Desktop 自带 mods（https://github.com/herdrdev/herdr-app，
+Apache License 2.0）的代码。
 
-mods/t3-actions is t3-actions from JinJieBeWater/herdr-t3
-(https://github.com/JinJieBeWater/herdr-t3), licensed under the Apache License,
-Version 2.0, and modified here (see mods/t3-actions/CHANGES.md).
+mods/oh-my-sidebar 来自 munza/herdr-mods 的 Better Sidebar
+（https://github.com/munza/herdr-mods），Copyright 2026 Tawsif Aqib，Apache License 2.0，
+在此处修改（见 mods/oh-my-sidebar/CHANGES.md）。原 NOTICE 全文引用如下：
 
-mods/usage-limits asks the claude and codex CLIs for usage the way Joseph Malicki's
-jmalicki/herdr-mod-ai-usage (MIT) does; no code is copied from it.
+    Herdr Mods — Better Changes, Better Files, Better Sidebar, Better Tabs, Branch PR,
+    Branch Issue, Hands, and Factory
+    Copyright 2026 Tawsif Aqib
 
-mods/image-viewer is the Image Viewer from dougcunha/herdr-mods
-(https://github.com/dougcunha/herdr-mods), Copyright 2026 Douglas Cunha, licensed under
-the MIT License, kept unmodified. mods/files-open-with opens it for image files.
+    Better Changes adapts behavior and code from Herdr Desktop's shipped Changes mod.
+    Better Files adapts behavior and code from Herdr Desktop's shipped Files mod.
+    Herdr Desktop is available at https://github.com/herdrdev/herdr-app and is
+    licensed under the Apache License, Version 2.0.
 
-mods/excalidraw bundles Excalidraw (MIT) and mods/file-icons bundles icons from the
-Material Icon Theme (MIT); their notices are in those folders.
+mods/t3-actions 来自 JinJieBeWater/herdr-t3
+（https://github.com/JinJieBeWater/herdr-t3），Apache License 2.0，
+在此处修改（见 mods/t3-actions/CHANGES.md）。
 
-skills/herdr-cowork/SKILL.md is the cowork skill (v1.1.0) from ninehills' gist
-(https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096); no license is stated
-upstream. Only its frontmatter name field is changed (cowork → herdr-cowork).
+mods/usage-limits 向 claude 和 codex CLI 询问用量的方式与 Joseph Malicki 的
+jmalicki/herdr-mod-ai-usage（MIT）相同；未复制其代码。
+
+mods/image-viewer 是 dougcunha/herdr-mods 的 Image Viewer
+（https://github.com/dougcunha/herdr-mods），Copyright 2026 Douglas Cunha，MIT 许可，
+原样保留。mods/files-open-with 对图片文件打开它。
+
+mods/excalidraw 打包了 Excalidraw（MIT），mods/file-icons 打包了 Material Icon Theme
+（MIT）的图标；声明见各自文件夹。
+
+skills/herdr-cowork/SKILL.md 来自 ninehills 的 gist（v1.1.0，
+https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096）；上游未声明许可。
+仅其 frontmatter 的 name 字段有改动（cowork → herdr-cowork）。
+
+更完整的第三方清单（含版本与出处链接）见 THIRD_PARTY.md。
