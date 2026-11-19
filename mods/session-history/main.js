@@ -250,9 +250,11 @@ export default class SessionHistory extends View {
     cx.notify();
   }
 
-  // One program glyph: letter tile when there is no usable icon, theme-tinted
-  // svg for white/currentColor glyphs, the program's own tile color under a
-  // white-on-tile icon, plain image otherwise (mirrors agent-handoff).
+  // One program glyph: letter tile when there is no usable icon; a `tile`
+  // color means the glyph is white and sits on its own tile (draw tile first —
+  // tinting it into the theme color loses the badge look); a `tint` glyph is
+  // bare currentColor and gets the theme color; otherwise a plain image
+  // (mirrors agent-handoff).
   programIcon(a, t, size = 14) {
     if (!a?.hasIcon) {
       const label = a?.label || a?.key || "?";
@@ -260,11 +262,11 @@ export default class SessionHistory extends View {
         .text_size(Math.max(8, Math.round(size * 0.6))).font_bold().text_color(t.foreground)
         .child(label[0].toUpperCase());
     }
-    if (a.tint) return svg(a.icon).size(size).flex_none().text_color(t.foreground);
     if (a.tile) {
       return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center().bg(a.tile)
         .child(image(a.icon).size(size - 4));
     }
+    if (a.tint) return svg(a.icon).size(size).flex_none().text_color(t.foreground);
     return image(a.icon).size(size).flex_none();
   }
 
@@ -532,10 +534,7 @@ export default class SessionHistory extends View {
       .children(AGENTS.map((a) => {
         const on = agents.some((x) => x.id === a.id);
         const prog = (this.icons || {})[a.id];
-        const logo = prog?.icon
-          ? (prog.tint ? svg(prog.icon).size(14).flex_none().text_color(t.foreground)
-                       : image(prog.icon).w(16).h(16).flex_none())
-          : div().w(14).h(14).flex_none().rounded(4).bg(t.raised).text_color(t.foreground).text_size(9).font_bold().flex().items_center().justify_center().child(a.label[0]);
+        const logo = this.programIcon(prog ?? { key: a.id, label: a.label }, t, 14);
         return h_flex()
           .id(`menu-agent-${a.id}`)
           .h(31)
