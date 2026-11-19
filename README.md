@@ -1,6 +1,6 @@
 # oh-my-herdr
 
-一个 Herdr Desktop 布局，参照 Orca 应用设计：项目侧栏内嵌 worktree，并挂各自的 issue/PR 徽章；每个条目下方直接列出它的 agent 和子代理；space 可以休眠、重启后恢复 agent；带资源占用表、每个 worktree 的悬停卡片、应用内的 GitHub issues 和 pull requests、Create worktree 对话框（可从分支、issue、PR 或新名字创建）、Files 与 Git changes 面板、运行按钮、用量窗口和实时端口。
+一个 Herdr Desktop 布局，参照 Orca 应用设计：项目侧栏内嵌 worktree，并挂各自的 issue/PR 徽章；每个条目下方直接列出它的 agent 和子代理；space 可以休眠、重启后恢复 agent；带资源占用表、每个 worktree 的悬停卡片、应用内的 GitHub issues 和 pull requests、Create worktree 对话框（可从分支、issue、PR 或新名字创建）、Files 与 Git changes 面板、运行按钮、用量窗口、实时端口，以及参照 Orca「代理会话历史」的会话历史面板（扫描 Claude、Codex、Pi、OMP、Gemini、OpenCode、ZCode 等本机 transcript 存储，可搜索、过滤、一键恢复、在工作树中恢复、移交给另一个代理、打开日志查看器；侧栏 Sessions 入口或 cmd-shift-h 打开）。
 
 ![oh-my-herdr](preview.png)
 
@@ -54,12 +54,17 @@ agent skill（收编在 `skills/`，可选）。SKILL.md 会装到 `~/.agents/sk
   `~/.local/state/herdr/plugins/dnzzl.automations/`；收编在 `cli/herdr-automations/`），
   `hc`（Herdr 自带 CLI），以及使用常见工具（`grep`、`sed`、`awk`、`jq`、`mkdir`、`find`、`cp`、`rm`、`date`、
   `sleep`）的小段 `sh`
-  脚本。用量窗口会调用 `claude` 和 `codex` CLI：鉴权由 CLI 自己完成，
+  脚本和一段 `python3` 脚本（session-history 的会话扫描器；macOS 自带）。用量窗口会调用 `claude` 和 `codex` CLI：鉴权由 CLI 自己完成，
   这里的任何代码都看不到它们的令牌。
 - **网络：** 只连 GitHub。`gh` 访问 GitHub API。`curl` 从 `github.com` 下载头像和项目图片，以及 issue/PR 正文引用的图片。对私有仓库的图片，`gh` 的令牌经 stdin 交给 curl——绝不走参数或命令行——且仅用于 `https://github.com/` 的 URL；当 GitHub 重定向到其存储主机时 curl 会丢弃令牌。
   除此之外不抓取任何内容。
 - **文件：** usage-limits 的 helper 读取会话日志（`~/.claude/sessions/`，遵循
-  `CLAUDE_CONFIG_DIR`，以及 Codex 的 rollout 文件）统计 token 和调用次数——离开这些脚本的只有数字。Hibernate 只从同样的文件里读会话 id，用于休眠后恢复 agent。不读取任何凭证。
+  `CLAUDE_CONFIG_DIR`，以及 Codex 的 rollout 文件）统计 token 和调用次数——离开这些脚本的只有数字。Hibernate 只从同样的文件里读会话 id，用于休眠后恢复 agent。session-history
+  读取各 agent CLI 的会话 transcript 存储（`~/.claude/projects/`、`~/.codex/sessions/`、
+  `~/.pi/agent/sessions/`、`~/.omp/agent/sessions/`、`~/.gemini/tmp/`、OpenCode 的
+  `storage/session/` 与 `opencode.db`（只读查询）、`~/.zcode/cli/agents/`）来列出和恢复
+  历史会话，并把这些会话的索引缓存在 `~/.config/herdr-app/data/session-history/`；
+  「删除」会删除选中的 transcript 文件或目录（两步确认）。不读取任何凭证。
 - **Skills（可选，`--with-skills`）：** 不联网——收编的
   `skills/herdr-cowork/SKILL.md` 被拷贝并软链（位置见上）。这个 skill 是一套提示词协议：采用它作为 commander 的 agent 会运行 `hc` 启动成员 agent CLI
   （各自在自己的权限下），在当前工作区写 `TEAM.md`，并通过 `herdr-app` 重命名 tab。它的 frontmatter `allowed-tools` 只在 Claude Code 里预授权 `hc`/`herdr-app`；其他 agent 走各自的审批流程。

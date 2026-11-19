@@ -10,7 +10,7 @@
 
 - **侧栏**（268px，44–480，`cmd-b` 折叠）：
   - `brand`（46px）：Herdr 的 `workspace-chrome` 品牌行。
-  - `sidebar-nav`（70px）：Orca 风格的链接，**Automations** 和 **Issues**，各自以弹窗打开其 mod（`automations`、`issues`）。
+  - `sidebar-nav`（100px）：Orca 风格的链接，**Automations** 和 **Issues**，各自以弹窗打开其 mod（`automations`、`issues`）；**Sessions** 以主区 tab 打开会话历史面板（`session-history`，`cmd-shift-h` 同效）。
   - **Spaces**（`oh-my-sidebar`）：每台机器一个分节（30px 横条：折叠箭头、显示器或服务器图标、粗体名称、连接时显示绿点、**+**；除第一台外每台机器上方一条 1px 分隔线），其内是你的**文件夹**（着色块：折叠箭头、彩色文件夹图标、名称、计数、**⋯**），未归入文件夹的 space 以同级缩进列在文件夹之后。一个仓库的主 checkout 会把它的 worktree 列在下方（`├─`/`└─` 加分支图标）。
     每行有第二行信息：分支、主 checkout 上的 `primary` 徽章、活跃时的 ↑/↓，有实时端口时的插头图标、关联 issue（绿圈 `#243`，关闭为紫色）及其 PR（状态图标 `#453`，打开为绿色，关闭/失败为红色，合并为紫色，草稿为灰色）。
     在每个 space 或 worktree 下方是它的 **agent**（26px 行，与名称对齐：程序图标、tab 名称、处于该状态的时长、状态）和它们的**子代理**（24px 行，沿树线排布，任意深度）——始终显示。
@@ -65,12 +65,12 @@
 - **Automations**：定时的 agent 提示，经 `herdr-automations` CLI——收编在
   `cli/herdr-automations/`（MIT，见其 `VENDOR.md`）；`install.sh` 负责构建或下载，面板的启动横幅安装按用户的调度服务。
 - 按键（合并 `keys.json`）：`cmd-n` new worktree、`cmd-shift-n` add project、`cmd-g` VS Code、
-  `cmd-shift-e` Excalidraw；本布局内 `cmd-shift-a` 切换侧栏 Spaces/Agents 标签、`cmd-shift-b` 开关右面板、`cmd-alt-]` / `cmd-alt-[` 下一个 / 上一个 space、`cmd-]` / `cmd-[` 下一个 / 上一个 agent、`cmd-w` / `cmd-shift-w` 关 tab / pane。按键关闭 tab 会先询问（「Close tab
+  `cmd-shift-e` Excalidraw；本布局内 `cmd-shift-a` 切换侧栏 Spaces/Agents 标签、`cmd-shift-b` 开关右面板、`cmd-shift-h` 开一个会话历史 tab、`cmd-alt-]` / `cmd-alt-[` 下一个 / 上一个 space、`cmd-]` / `cmd-[` 下一个 / 上一个 agent、`cmd-w` / `cmd-shift-w` 关 tab / pane。按键关闭 tab 会先询问（「Close tab
   …?」，Enter 确认）；tab 的 ×、其菜单的 Close 和 pane 的关闭按钮则不问。
 
 ## 构成
 
-`layouts/oh-my-herdr.json` 与 `mods/` 下的 25 个 mod。原样使用的 Herdr 自带 mod：`workspace-chrome`、`files`、
+`layouts/oh-my-herdr.json` 与 `mods/` 下的 26 个 mod。原样使用的 Herdr 自带 mod：`workspace-chrome`、`files`、
 `changes`、`pane`、`confirm`、`picker`、`machine-add`。自 munza/herdr-mods 收编、未修改：`better-changes`（占 `changes` 槽位，`"place": "none"`）和 `better-config`。
 
 - `oh-my-sidebar`（munza 的 Better Sidebar，有修改；`props.view` 选视图：spaces、`agents`、
@@ -82,7 +82,15 @@
   `automations`、`usage-limits`（`helpers/*.sh`）、`live-ports`、`desktop-notifications`、
   `hibernate`（`core.js` 快照/停止/启动、`ui.js` 对话框、与
   `oh-my-sidebar` 共享的 `settings.js`）、`resources`（`measure.js`）、
-  `new-project`、`open-vscode`、`excalidraw`。
+  `new-project`、`open-vscode`、`excalidraw`、
+  `session-history`（收编自 itisvincent/herdr-session-history，有修改：见其 `CHANGES.md`；
+  代理会话历史面板，持久增量索引并扫描 Claude/Codex/Pi/OMP/Gemini/OpenCode/ZCode 等
+  本机 transcript 存储：工作区/项目/全部三档视图、每源进度条、搜索、按 space 过滤、
+  恢复、在工作树中恢复（同 git 仓库的 space 选择器）、移交给另一个代理（brief 镜像
+  `agent-handoff`）、打开日志（`log.py` 渲染的可读 transcript tab）、复制恢复命令/会话
+  ID/日志路径、Reveal、两步删除。入口：侧栏 **Sessions** 或 `cmd-shift-h` →
+  `tab.new {mod:"session-history"}`；一份类四种 props copy：panel / viewer / handoff /
+  轻弹窗。缓存索引在 `data/session-history/index.json`）。
 - 共享状态键：`live-ports`、`oh-my-sidebar.hover`、`oh-my-sidebar.inline-agents`、
   `oh-my-sidebar.groups`（`{groups: [{id, name, color, home}], projects: {<unit>: <folder id>},
   folds: {"<machine>|<folder id>": bool}}`；unit 是仓库的 `JSON.stringify([machine, git common
