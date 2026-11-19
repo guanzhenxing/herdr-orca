@@ -175,6 +175,16 @@
                   "type": "column",
                   "children": [
                     {
+                      "id": "panel-head",
+                      "type": "block",
+                      "size": {
+                        "px": 30
+                      },
+                      "content": {
+                        "mod": "panel-head"
+                      }
+                    },
+                    {
                       "id": "panel-body",
                       "type": "stack",
                       "children": [

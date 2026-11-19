@@ -136,16 +136,8 @@ export default class Tabs extends View {
     // Only panels the side panel has: Issues and Automations are popups now (sidebar-nav).
     const enabled = (shared("workspace.panels") ?? ["files", "changes"]).filter(id => body?.children?.some(c => c.id === id));
     this.syncPanel(space, panel, body, enabled);
-    const panelButton = (id, label, icon) => {
-      const on = panel && !panel.hidden && body?.active === id;
-      return h_flex().id(`panel-${id}`).h(26).px(8).gap(5).flex_none().items_center().rounded(6)
-        .text_size(12).bg(on ? t.selected : t.chrome).text_color(on ? t.foreground : t.muted)
-        .hover(s => s.bg(t.hover)).on_mouse_down("left", stop)
-        .on_click(() => {
-          if (on) run("layout.hide", { id: "panel" });
-          else { run("layout.select", { stack: "panel-body", child: id }); run("layout.show", { id: "panel" }); }
-        }).child(svg(icon).size(14)).child(label);
-    };
+    // syncPanel still auto-shows the remembered panel per space; the buttons
+    // themselves live in mods/panel-head now.
     return h_flex().size_full().min_w(0).px(10).pl(lightsPadding).gap(3).items_center().bg(t.chrome).border_b(1).border_color(t.border)
       .on_mouse_up("left", () => { this.pressed = null; })
       .on_scroll_wheel(e => { if (Math.abs(e.delta.y) >= 1) run(e.delta.y > 0 ? "tab.prev" : "tab.next"); })
@@ -153,16 +145,12 @@ export default class Tabs extends View {
       // this one appears only once the sidebar is hidden, so a way back is always visible.
       .when(Boolean(sidebar?.hidden), el => el.child(button("sidebar-toggle", svg("mods/workspace-chrome/sidebar.svg").size(15), () => run("layout.show", { id: "sidebar" }))
         .tooltip("Show sidebar")))
-      // The + lives inside the scroll area, right after the last tab (browser-style);
-      // the Files / Changes buttons keep the row's right edge.
+      // The + lives inside the scroll area, right after the last tab (browser-style).
+      // Panel controls moved off this row: the right panel carries its own
+      // header now (mods/panel-head) — Files/Changes segment + Excalidraw + ✕;
+      // the row keeps only the 36px panel-toggle from the layout.
       .child(h_flex().id("tab-scroll").flex_1().min_w(0).h_full().items_center().gap(3).overflow_x_scrollbar()
         .children([...shown.map(item), button("tab-new", "+", () => openOverlay({ mod: "my-new-menu", kind: "popup", width: 250, height: 543 }))]))
-      .when(enabled.includes("files"), el => el.child(panelButton("files", "Files", "mods/files/file.svg")))
-      .when(enabled.includes("changes"), el => el.child(panelButton("changes", "Changes", "mods/changes/changes.svg")))
-      .child(h_flex().id("excalidraw").h(26).px(8).gap(5).flex_none().items_center().rounded(6).text_size(12).text_color(t.muted)
-        .hover(s => s.bg(t.hover).text_color(t.foreground)).tooltip("Open a drawing (⌘⇧E)").on_mouse_down("left", stop)
-        .on_click(() => run("mod.open", { name: "excalidraw" }))
-        .child(svg("mods/excalidraw/icons/freedraw.svg").size(14)).child("Excalidraw"))
       .when(w?.buttons, el => el.child(button("minimize", w.platform === "windows" ? svg("mods/my-tabs/win-min.svg").size(16) : "−", () => run("window.minimize")))
         .child(button("maximize", w.platform === "windows" ? svg(`mods/my-tabs/${w.maximized ? "win-restore" : "win-max"}.svg`).size(16) : "□", () => run("window.maximize")))
         .child(button("close-window", w.platform === "windows" ? svg("mods/my-tabs/win-close.svg").size(16) : svg("mods/pane/close.svg").size(13), () => run("window.close"))));
