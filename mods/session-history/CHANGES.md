@@ -95,12 +95,13 @@
 
 ## 图标（M3 后续）
 
-来源进度区与会话行的代理标签改用**正式程序图标**（与启动菜单一致）：
-`knownAgents` 的图标（按 fill="#fff"/currentColor/tile 分类，白色 glyph 走 svg() 主题
-着色、tile 图标垫自己的底色、其余 image()）；app 程序表没有的 OMP/ZCode 用 mod 内
-`icons/omp.svg`（Herdr 自带，白色 glyph 垫深色块）与 `icons/zcode.svg`（同仓库
-usage-limits 的 ZCode 品牌图），都没有时回退字母块。行内缩进 44 → 24 px（图标替代
-宽文字标签）。
+来源进度区与会话行的代理标签改用**正式程序图标**，绘制规则与自带启动菜单
+（new-menu）完全一致——只有两种情况：`tint`（one-color glyph，如 pi/omp/opencode）
+用 `svg()` 画成主题前景色，其余（claude 橙色 ✳、codex、gemini、zcode 等自带颜色的
+图标）用 `image()` 原样绘制。程序表的 `tile` 底色**不使用**——那是徽章样式的可选项，
+官方菜单不用它，垫上会出现一排黑色方块（首版即踩此坑）。app 程序表没有的 OMP/ZCode
+用 mod 内 `icons/omp.svg`（Herdr 自带，tint 绘制）与 `icons/zcode.svg`（同仓库
+usage-limits 的 ZCode 品牌图），都没有时回退字母块。行内缩进 44 → 24 px。
 
 ## 修复（M3 后续）：面板永久卡在 "Scanning sessions…"
 

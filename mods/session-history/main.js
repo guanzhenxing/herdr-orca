@@ -43,7 +43,7 @@ const AGENTS = [
 // Brand icons for stores the app's program table doesn't carry (OMP/ZCode),
 // bundled in this mod's icons/ folder.
 const LOCAL_ICONS = {
-  omp: { file: "omp.svg", tile: "#202020" }, // white glyph on its dark tile
+  omp: { file: "omp.svg", tint: true }, // white glyph, drawn in theme color
   zcode: { file: "zcode.svg" }, // multicolor brand mark
 };
 
@@ -250,21 +250,17 @@ export default class SessionHistory extends View {
     cx.notify();
   }
 
-  // One program glyph: letter tile when there is no usable icon; a `tile`
-  // color means the glyph is white and sits on its own tile (draw tile first —
-  // tinting it into the theme color loses the badge look); a `tint` glyph is
-  // bare currentColor and gets the theme color; otherwise a plain image
-  // (mirrors agent-handoff).
+  // One program glyph, drawn exactly like the shipped launcher menu
+  // (new-menu): `tint` marks a one-color glyph and is drawn in the theme
+  // foreground via svg(); everything else is the icon's own picture via
+  // image(). Program-table `tile` colors are badge-style and don't match the
+  // menu look, so they are not used here.
   programIcon(a, t, size = 14) {
     if (!a?.hasIcon) {
       const label = a?.label || a?.key || "?";
-      return div().size(size).rounded(Math.max(3, Math.round(size / 4))).bg(t.raised).flex_none().flex().items_center().justify_center()
-        .text_size(Math.max(8, Math.round(size * 0.6))).font_bold().text_color(t.foreground)
+      return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center()
+        .text_size(Math.max(8, Math.round(size * 0.6))).font_bold().text_color(t.muted)
         .child(label[0].toUpperCase());
-    }
-    if (a.tile) {
-      return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center().bg(a.tile)
-        .child(image(a.icon).size(size - 4));
     }
     if (a.tint) return svg(a.icon).size(size).flex_none().text_color(t.foreground);
     return image(a.icon).size(size).flex_none();
@@ -272,13 +268,11 @@ export default class SessionHistory extends View {
 
   agentGlyph(id, t, size = 16) {
     const known = this.icons[id];
-    if (known?.hasIcon) return this.programIcon(known, t, size);
+    if (known) return this.programIcon(known, t, size);
     const local = LOCAL_ICONS[id];
     if (local) {
-      if (local.tile) {
-        return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center().bg(local.tile)
-          .child(image(`mods/session-history/icons/${local.file}`).size(size - 4));
-      }
+      // bundled brand marks follow the same two-case rule as the menu
+      if (local.tint) return svg(`mods/session-history/icons/${local.file}`).size(size).flex_none().text_color(t.foreground);
       return image(`mods/session-history/icons/${local.file}`).size(size).flex_none();
     }
     return this.programIcon({ key: id, label: (AGENTS.find((a) => a.id === id) ?? {}).label ?? id }, t, size);
