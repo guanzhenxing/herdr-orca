@@ -36,10 +36,9 @@ export default class PanelHead extends View {
         .gap(6)
         .flex_none()
         .items_center()
-        .rounded(6)
         .text_size(12)
-        .bg(active === id ? t.selected : t.chrome)
-        .text_color(active === id ? t.foreground : t.muted)
+        .when(active === id, (el) => el.bg(t.selected).text_color(t.foreground))
+        .when(active !== id, (el) => el.text_color(t.muted))
         .hover((s) => s.bg(t.hover))
         .cursor_pointer()
         .on_click(() => {
@@ -65,20 +64,37 @@ export default class PanelHead extends View {
         .tooltip(tooltip)
         .on_click(fn)
         .child(svg(icon).size(13));
+    // A transparent toolbar floating above the panel cards — no background,
+    // no border: painting a chrome strip here stacked a second box on top of
+    // the files/changes cards and read as a visual fault line.
     return h_flex()
       .id("panel-head")
       .size_full()
-      .h(30)
+      .h(34)
       .flex_none()
       .px(8)
       .gap(4)
       .items_center()
-      .bg(t.chrome)
-      .border_b(1)
-      .border_color(t.border)
       .children(PANELS.filter(([id]) => enabled.includes(id)).map(([id, label, icon]) => seg(id, label, icon)))
       .child(div().flex_1())
-      .child(iconBtn("ph-excalidraw", "mods/excalidraw/icons/freedraw.svg", "Open a drawing (⌘⇧E)", () => run("mod.open", { name: "excalidraw" })))
+      .child(
+        h_flex()
+          .id("ph-excalidraw")
+          .h(24)
+          .px(8)
+          .gap(5)
+          .flex_none()
+          .items_center()
+          .rounded(6)
+          .cursor_pointer()
+          .text_size(12)
+          .text_color(t.muted)
+          .hover((s) => s.bg(t.hover).text_color(t.foreground))
+          .tooltip("Open a drawing (⌘⇧E)")
+          .on_click(() => run("mod.open", { name: "excalidraw" }))
+          .child(svg("mods/excalidraw/icons/freedraw.svg").size(13))
+          .child("Excalidraw"),
+      )
       .child(iconBtn("ph-close", "mods/pane/close.svg", "收起面板 (⌘⇧B)", () => run("layout.hide", { id: "panel" })));
   }
 }

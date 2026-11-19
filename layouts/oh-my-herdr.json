@@ -178,7 +178,7 @@
                       "id": "panel-head",
                       "type": "block",
                       "size": {
-                        "px": 30
+                        "px": 34
                       },
                       "content": {
                         "mod": "panel-head"
