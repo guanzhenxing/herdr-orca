@@ -93,6 +93,15 @@
 - 删除动作保留上游的两步内联确认，未改走 `confirm` mod——内联两步已够用，少一次
   overlay 依赖（与原计划的偏差）。
 
+## 图标（M3 后续）
+
+来源进度区与会话行的代理标签改用**正式程序图标**（与启动菜单一致）：
+`knownAgents` 的图标（按 fill="#fff"/currentColor/tile 分类，白色 glyph 走 svg() 主题
+着色、tile 图标垫自己的底色、其余 image()）；app 程序表没有的 OMP/ZCode 用 mod 内
+`icons/omp.svg`（Herdr 自带，白色 glyph 垫深色块）与 `icons/zcode.svg`（同仓库
+usage-limits 的 ZCode 品牌图），都没有时回退字母块。行内缩进 44 → 24 px（图标替代
+宽文字标签）。
+
 ## 修复（M3 后续）：面板永久卡在 "Scanning sessions…"
 
 现象：打开面板后 banner「This view could not be re-rendered — interrupted」，

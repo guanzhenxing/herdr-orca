@@ -40,6 +40,13 @@ const AGENTS = [
 ];
 
 // Orca opens on 全部; "This folder" starts nearly empty for most spaces.
+// Brand icons for stores the app's program table doesn't carry (OMP/ZCode),
+// bundled in this mod's icons/ folder.
+const LOCAL_ICONS = {
+  omp: { file: "omp.svg", tile: "#202020" }, // white glyph on its dark tile
+  zcode: { file: "zcode.svg" }, // multicolor brand mark
+};
+
 const scopeOf = () => SCOPES.find((s) => s.id === shared("session-history.scope")) ?? SCOPES[2];
 const agentsOf = () => {
   const raw = shared("session-history.agents");
@@ -158,11 +165,7 @@ export default class SessionHistory extends View {
       // light copies: the agents filter menu still wants the program icons
       if (p.agentsMenu && !checking()) {
         cx.spawn(async (cx) => {
-          try {
-            const known = await knownAgents();
-            this.icons = Object.fromEntries((known || []).map((x) => [x.key, x]));
-            cx.notify();
-          } catch {}
+          await this.loadIcons(cx);
         });
       }
       return;
@@ -192,12 +195,7 @@ export default class SessionHistory extends View {
     this.input.on("change", (_e, cx) => { this.filter = this.input.value(); this._dirty = true; this.scheduleRebuild(cx); cx.notify(); });
     cx.spawn(async (cx) => {
       if (checking()) return;
-      // Orca-style logos: the app's program table carries per-agent icons.
-      try {
-        const known = await knownAgents();
-        this.icons = Object.fromEntries((known || []).map((p) => [p.key, p]));
-        cx.notify();
-      } catch {}
+      await this.loadIcons(cx);
       await this.refresh(cx);
       this.booted = true;
       cx.notify();
@@ -226,6 +224,62 @@ export default class SessionHistory extends View {
         await this.refresh(cx);
       }
     });
+  }
+
+  // The app's program table carries the official per-agent icons (same ones
+  // as the launcher menu). `tint` marks white/currentColor glyphs, which must
+  // be drawn theme-tinted via svg() or they vanish on light backgrounds;
+  // `tile` marks icons meant to sit on their own tile color. Icon files are
+  // sub-KB, so reading them with `cat` is safe (readTextFile stalls on big
+  // files; see M2 notes).
+  async loadIcons(cx) {
+    try {
+      const known = await knownAgents();
+      const withIcons = await Promise.all((known || []).map(async (a) => {
+        let text = null;
+        if (a.icon) {
+          try {
+            const r = await exec("cat", [`${appHome()}/${a.icon}`], { timeout: 5000 });
+            text = r.stdout || null;
+          } catch {}
+        }
+        return { ...a, hasIcon: Boolean(a.icon), tint: text ? /fill="#fff"|fill="white"|currentColor/i.test(text) : false };
+      }));
+      this.icons = Object.fromEntries(withIcons.map((p) => [p.key, p]));
+    } catch {}
+    cx.notify();
+  }
+
+  // One program glyph: letter tile when there is no usable icon, theme-tinted
+  // svg for white/currentColor glyphs, the program's own tile color under a
+  // white-on-tile icon, plain image otherwise (mirrors agent-handoff).
+  programIcon(a, t, size = 14) {
+    if (!a?.hasIcon) {
+      const label = a?.label || a?.key || "?";
+      return div().size(size).rounded(Math.max(3, Math.round(size / 4))).bg(t.raised).flex_none().flex().items_center().justify_center()
+        .text_size(Math.max(8, Math.round(size * 0.6))).font_bold().text_color(t.foreground)
+        .child(label[0].toUpperCase());
+    }
+    if (a.tint) return svg(a.icon).size(size).flex_none().text_color(t.foreground);
+    if (a.tile) {
+      return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center().bg(a.tile)
+        .child(image(a.icon).size(size - 4));
+    }
+    return image(a.icon).size(size).flex_none();
+  }
+
+  agentGlyph(id, t, size = 16) {
+    const known = this.icons[id];
+    if (known?.hasIcon) return this.programIcon(known, t, size);
+    const local = LOCAL_ICONS[id];
+    if (local) {
+      if (local.tile) {
+        return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center().bg(local.tile)
+          .child(image(`mods/session-history/icons/${local.file}`).size(size - 4));
+      }
+      return image(`mods/session-history/icons/${local.file}`).size(size).flex_none();
+    }
+    return this.programIcon({ key: id, label: (AGENTS.find((a) => a.id === id) ?? {}).label ?? id }, t, size);
   }
 
   watchRoots() {
@@ -722,20 +776,22 @@ export default class SessionHistory extends View {
       .children(rows.map(([id, v]) => {
         const pct = v.total > 0 ? Math.min(1, v.indexed / v.total) : 0;
         const full = v.indexed >= v.total;
+        const label = (AGENTS.find((a) => a.id === id) ?? {}).label ?? id;
         return h_flex()
           .id(`sh-src-${id}`)
           .h(18)
-          .gap(8)
+          .gap(6)
           .flex_none()
           .items_center()
+          .child(this.agentGlyph(id, t, 14))
           .child(
             div()
-              .w(64)
+              .w(74)
               .flex_none()
               .truncate()
               .text_size(10.5)
               .text_color(t.muted)
-              .child(id),
+              .child(label),
           )
           .child(
             div()
@@ -819,32 +875,20 @@ export default class SessionHistory extends View {
           h_flex()
             .items_center()
             .gap(8)
-            .child(
-              h_flex()
-                .w(44)
-                .flex_none()
-                .h(16)
-                .rounded(4)
-                .items_center()
-                .justify_center()
-                .when(s.agent === "pi", (el) => el.bg(t.working + "22").text_color(t.working))
-                .when(s.agent === "claude", (el) => el.bg(t.done + "22").text_color(t.done))
-                .when(s.agent === "codex", (el) => el.bg((t.ansi4 || t.accent) + "22").text_color(t.ansi4 || t.accent))
-                .child(div().text_size(9.5).font_bold().child(String(s.agent || "?").toUpperCase())),
-            )
+            .child(this.agentGlyph(s.agent, t, 16))
             .child(div().flex_1().min_w(0).truncate().text_size(12).text_color(t.foreground).child(this.spaceLabelFor(s.cwd, ctx) || s.folder || s.cwd || s.id))
             .child(div().text_size(10.5).text_color(t.dim).child(age(s.mtime))),
         )
         .when(Boolean(s.preview), (el) =>
-          el.child(div().pl(44).text_size(11).text_color(t.muted).truncate().child(s.preview)),
+          el.child(div().pl(24).text_size(11).text_color(t.muted).truncate().child(s.preview)),
         )
         .when(open, (el) =>
           el
-            .child(div().pl(44).pt(2).text_size(10.5).text_color(t.dim).truncate().child(s.cwd || "(no folder recorded)"))
+            .child(div().pl(24).pt(2).text_size(10.5).text_color(t.dim).truncate().child(s.cwd || "(no folder recorded)"))
             .when(s.msgs != null || Boolean(s.model), (el) =>
               el.child(
                 h_flex()
-                  .pl(44)
+                  .pl(24)
                   .gap(10)
                   .pt(1)
                   .when(s.msgs != null, (el2) =>
@@ -858,7 +902,7 @@ export default class SessionHistory extends View {
             .when(Boolean(s.first_prompt), (el) =>
               el.child(
                 v_flex()
-                  .pl(44)
+                  .pl(24)
                   .pt(2)
                   .gap(2)
                   .child(div().text_size(10).text_color(t.dim).child("首次提示"))
@@ -876,7 +920,7 @@ export default class SessionHistory extends View {
             )
             .child(
               h_flex()
-                .pl(44)
+                .pl(24)
                 .gap(6)
                 .pt(3)
                 // ZCode rows carry no argv: ⋯ menu holds the view-only actions.
