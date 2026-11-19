@@ -226,26 +226,15 @@ export default class SessionHistory extends View {
     });
   }
 
-  // The app's program table carries the official per-agent icons (same ones
-  // as the launcher menu). `tint` marks white/currentColor glyphs, which must
-  // be drawn theme-tinted via svg() or they vanish on light backgrounds;
-  // `tile` marks icons meant to sit on their own tile color. Icon files are
-  // sub-KB, so reading them with `cat` is safe (readTextFile stalls on big
-  // files; see M2 notes).
+  // The app's program table carries the official per-agent icons — the very
+  // same entries, flags and files the launcher menu draws with. Use its
+  // `tint` as given: re-deriving it from the svg text misclassifies gradient
+  // icons (codex) as one-color glyphs and svg()-tints them into a black
+  // square.
   async loadIcons(cx) {
     try {
       const known = await knownAgents();
-      const withIcons = await Promise.all((known || []).map(async (a) => {
-        let text = null;
-        if (a.icon) {
-          try {
-            const r = await exec("cat", [`${appHome()}/${a.icon}`], { timeout: 5000 });
-            text = r.stdout || null;
-          } catch {}
-        }
-        return { ...a, hasIcon: Boolean(a.icon), tint: text ? /fill="#fff"|fill="white"|currentColor/i.test(text) : false };
-      }));
-      this.icons = Object.fromEntries(withIcons.map((p) => [p.key, p]));
+      this.icons = Object.fromEntries((known || []).map((p) => [p.key, p]));
     } catch {}
     cx.notify();
   }
@@ -256,7 +245,7 @@ export default class SessionHistory extends View {
   // image(). Program-table `tile` colors are badge-style and don't match the
   // menu look, so they are not used here.
   programIcon(a, t, size = 14) {
-    if (!a?.hasIcon) {
+    if (!a?.icon) {
       const label = a?.label || a?.key || "?";
       return div().size(size).rounded(Math.max(3, Math.round(size / 4))).flex_none().flex().items_center().justify_center()
         .text_size(Math.max(8, Math.round(size * 0.6))).font_bold().text_color(t.muted)
@@ -269,6 +258,7 @@ export default class SessionHistory extends View {
   agentGlyph(id, t, size = 16) {
     const known = this.icons[id];
     if (known) return this.programIcon(known, t, size);
+    // not in the program table: fall back to this mod's bundled brand marks
     const local = LOCAL_ICONS[id];
     if (local) {
       // bundled brand marks follow the same two-case rule as the menu
