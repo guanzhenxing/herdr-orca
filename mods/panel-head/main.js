@@ -36,6 +36,7 @@ export default class PanelHead extends View {
         .gap(6)
         .flex_none()
         .items_center()
+        .rounded(6)
         .text_size(12)
         .when(active === id, (el) => el.bg(t.selected).text_color(t.foreground))
         .when(active !== id, (el) => el.text_color(t.muted))
