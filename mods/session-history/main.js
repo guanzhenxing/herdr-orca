@@ -1104,11 +1104,22 @@ export default class SessionHistory extends View {
           .child(
             div()
               .id("sh-refresh")
-              .text_size(12)
+              .size(26)
+              .rounded(6)
+              .flex()
+              .items_center()
+              .justify_center()
+              .cursor_pointer()
               .text_color(t.dim)
-              .hover((el) => el.text_color(t.foreground))
+              .hover((el) => el.bg(t.hover).text_color(t.foreground))
+              .tooltip("重新扫描")
               .on_click((_e, c) => this.refresh(c))
-              .child(this.loading ? "…" : "↻"),
+              .child(
+                svg("mods/usage-limits/icons/refresh.svg")
+                  .size(14)
+                  .flex_none()
+                  .when(this.loading, (el) => el.spin(900).text_color(t.accent)),
+              ),
           ),
       )
       .child(this.sourcesBlock(t))
