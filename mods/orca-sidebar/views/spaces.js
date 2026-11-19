@@ -466,12 +466,13 @@ export class Spaces {
   }
 
   menu(w) {
-    // A popup is as tall as its items; height is only the most.
+    // A popup is as tall as its items; height is only the most. The menu's
+    // grouped layout (8 items + section headers) needs more than the old 300.
     openOverlay({
       mod: "my-menu",
       kind: "popup",
       width: 200,
-      height: 300,
+      height: 440,
       props: { tab: "space", target: { id: w.id } },
     });
   }

@@ -5,7 +5,7 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { home, focused as focusedNow, run, props, closeOverlay, openOverlay, theme, keys, terminals, spaces, panes, exec, shared, setShared } from "herdr";
+import { home, focused as focusedNow, run, props, closeOverlay, openOverlay, theme, keys, terminals, spaces, panes, exec as runProg, shared, setShared } from "herdr";
 
 // Where a space is now: its first terminal's live folder, else where it was made.
 function place(s) {
@@ -21,13 +21,17 @@ const newSpaceArgs = () => {
 
 // A space's checkout: "main" (a repo's own), "linked" (a worktree), or null.
 async function checkout(folder, on) {
-  const top = await exec("git", ["rev-parse", "--show-toplevel"], { cwd: folder, on });
-  const common = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: folder, on });
+  const top = await runProg("git", ["rev-parse", "--show-toplevel"], { cwd: folder, on });
+  const common = await runProg("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: folder, on });
   if (top.code !== 0 || common.code !== 0) return null;
   return common.stdout.trim() === `${top.stdout.trim()}/.git` ? "main" : "linked";
 }
 
-function items(p, git) {
+// Items come back grouped: sections() yields { label?, items } — the renderer
+// draws a divider between sections and a small header where a label is set.
+// Sort order is by use: layout first, agent actions, then terminal behavior,
+// destructive closes last.
+function sections(p, git) {
   p = p ?? {};
   const tg = p.target ?? {};
   switch (p.tab) {
@@ -39,52 +43,69 @@ function items(p, git) {
       // Once they go to the program, Shift+right-click still opens this menu.
       const toProgram = term?.labels?.["herdr.right-click"] === "program";
       return [
-        ["Split right", "pane.split", { direction: "right", pane: tg.pane }],
-        ["Split down", "pane.split", { direction: "down", pane: tg.pane }],
-        ["Zoom", "pane.zoom", { pane: tg.pane }],
-        ...(term
-          ? [
-              toProgram
-                ? ["Use Herdr right-click menu", "terminal.right_click", { terminal: term.address, to: "menu" }]
-                : ["Send right-clicks to pane", "terminal.right_click", { terminal: term.address, to: "program" }],
-            ]
-          : []),
-        ...(parent ? [[`Send back to ${parent.name || parent.address}`, "terminal.park", { terminal: term.address }]] : []),
-        ["Close pane", `my-tabs.close-pane:${tg.pane}`, {}],
+        { label: "布局", items: [
+          ["Split right", "pane.split", { direction: "right", pane: tg.pane }],
+          ["Split down", "pane.split", { direction: "down", pane: tg.pane }],
+          ["Zoom", "pane.zoom", { pane: tg.pane }],
+        ]},
+        { label: "代理", items: [
+          ...(term ? [["移交给另一个代理", "agent-handoff", { terminal: term.address }]] : []),
+          ...(parent ? [[`Send back to ${parent.name || parent.address}`, "terminal.park", { terminal: term.address }]] : []),
+        ]},
+        { label: "终端", items: term ? [
+          toProgram
+            ? ["Use Herdr right-click menu", "terminal.right_click", { terminal: term.address, to: "menu" }]
+            : ["Send right-clicks to pane", "terminal.right_click", { terminal: term.address, to: "program" }],
+        ] : []},
+        { items: [["Close pane", `my-tabs.close-pane:${tg.pane}`, {}]] },
       ];
     }
     case "tab":
       return [
-        ["Rename", "tab.rename", { id: tg.id }],
-        ["New tab", "tab.new", { space: tg.space }],
+        { items: [
+          ["Rename", "tab.rename", { id: tg.id }],
+          ["New tab", "tab.new", { space: tg.space }],
+        ]},
         // my-tabs checks it: the last tab of a worktree space removes the worktree instead.
-        ["Close", `my-tabs.close-tab:${tg.id}`, {}],
+        { items: [["Close", `my-tabs.close-tab:${tg.id}`, {}]] },
       ];
     case "space":
       return [
-        ["Rename", "space.rename", { id: tg.id }],
-        ...(git ? [["Project settings…", "project-settings", { space: tg.id }]] : []),
-        ...(git ? [["New worktree", "worktree", { space: tg.id, action: "new" }], ["Open worktree", "worktree", { space: tg.id, action: "open" }]] : []),
+        { items: [
+          ["Rename", "space.rename", { id: tg.id }],
+          ...(git ? [["Project settings…", "project-settings", { space: tg.id }]] : []),
+          // orca-sidebar's folders: a repo files with its worktrees, any other space by itself.
+          // orca-sidebar's worktree notes: one note per checkout, edited in its dialog.
+          ["Note…", "note", { space: tg.id }],
+          ["Move to folder…", "move-folder", { space: tg.id }],
+        ]},
+        { label: "工作树", items: git ? [
+          ["New worktree", "worktree", { space: tg.id, action: "new" }],
+          ["Open worktree", "worktree", { space: tg.id, action: "open" }],
+        ] : []},
         // hibernate mod: stop a space's programs (on this computer or another machine), or start them again.
-        // orca-sidebar's folders: a repo files with its worktrees, any other space by itself.
-        // orca-sidebar's worktree notes: one note per checkout, edited in its dialog.
-        ["Note…", "note", { space: tg.id }],
-        ["Move to folder…", "move-folder", { space: tg.id }],
-        ...(tg.id ? [shared("hibernate.sleeping")?.[tg.id] ? ["Wake space", "hibernate", { action: "wake", space: tg.id }] : ["Sleep space", "hibernate", { action: "sleep", space: tg.id }]] : []),
+        { label: "电源", items: tg.id ? [shared("hibernate.sleeping")?.[tg.id] ? ["Wake space", "hibernate", { action: "wake", space: tg.id }] : ["Sleep space", "hibernate", { action: "sleep", space: tg.id }]] : [] },
         // A worktree space closes by removing its worktree (the dialog checks for unsaved work first).
-        git === "linked" ? ["Close & remove worktree", "worktree", { space: tg.id, action: "remove" }] : ["Close", "space.close", { id: tg.id }],
+        { items: [git === "linked" ? ["Close & remove worktree", "worktree", { space: tg.id, action: "remove" }] : ["Close", "space.close", { id: tg.id }]] },
       ];
     default:
       return [
         // At home, not in the focused (maybe worktree) folder: a second space there shares its removal.
-        ["New space", "space.new", newSpaceArgs()],
-        ["Keybinds", "app.help", {}],
-        ["Theme: graphite", "app.theme", { name: "graphite" }],
-        ["Theme: ink", "app.theme", { name: "ink" }],
-        ["Theme: moss", "app.theme", { name: "moss" }],
-        ["Theme: atom one dark", "app.theme", { name: "atom-one-dark" }],
+        { items: [["New space", "space.new", newSpaceArgs()]] },
+        { label: "主题", items: [
+          ["Theme: graphite", "app.theme", { name: "graphite" }],
+          ["Theme: ink", "app.theme", { name: "ink" }],
+          ["Theme: moss", "app.theme", { name: "moss" }],
+          ["Theme: atom one dark", "app.theme", { name: "atom-one-dark" }],
+        ]},
+        { items: [["Keybinds", "app.help", {}]] },
       ];
   }
+}
+
+// The menu's items, flattened in render order (headers are not selectable).
+function flatItems(p, git) {
+  return sections(p, git).flatMap((s) => s.items);
 }
 
 const closes = (it) => it[0].startsWith("Close");
@@ -92,7 +113,7 @@ const closes = (it) => it[0].startsWith("Close");
 function menuIcon(it) {
   const command = it[1];
   if (command === "hibernate") return `mods/hibernate/${it[2].action === "wake" ? "sun" : "moon"}.svg`;
-  const name = closes(it) ? "x" : command.endsWith(".rename") ? "square-pen" : command.endsWith(".new") ? "plus" : command === "worktree" ? "git-branch" : command === "move-folder" ? "folder" : command === "note" ? "file-text" : command === "app.help" ? "terminal" : command === "app.theme" || command === "project-settings" ? "settings" : command === "pane.split" ? "panel-right" : command === "pane.zoom" ? "square" : "terminal";
+  const name = closes(it) ? "x" : command === "agent-handoff" ? "terminal" : command.endsWith(".rename") ? "square-pen" : command.endsWith(".new") ? "plus" : command === "worktree" ? "git-branch" : command === "move-folder" ? "folder" : command === "note" ? "file-text" : command === "app.help" ? "terminal" : command === "app.theme" || command === "project-settings" ? "settings" : command === "pane.split" ? "panel-right" : command === "pane.zoom" ? "square" : "terminal";
   return `mods/workspace-chrome/${name}.svg`;
 }
 
@@ -121,11 +142,13 @@ export default class Menu extends View {
   }
 
   choose(i, cx) {
-    const it = items(props(), this.git)[i];
+    const it = flatItems(props(), this.git)[i];
     if (!it) return;
     closeOverlay(props()?.overlay);
     // Remove uses my-worktree's restyled confirm.
     if (it[1] === "project-settings") openOverlay({ mod: "project-settings", kind: "dialog", width: 660, height: 700, props: it[2] });
+    // Hand the running session to another agent: the handoff dialog takes the terminal.
+    else if (it[1] === "agent-handoff") openOverlay({ mod: "agent-handoff", kind: "dialog", width: 560, height: 660, props: it[2] });
     else if (it[1] === "worktree" && it[2].action === "remove") openOverlay({ mod: "my-worktree", kind: "dialog", width: 460, height: 350, props: it[2] });
     // New and open use the Create worktree dialog (new-worktree); open starts on its Branch tab.
     else if (it[1] === "worktree") openOverlay({ mod: "new-worktree", kind: "dialog", width: 560, height: 780, props: { space: it[2].space, ...(it[2].action === "open" ? { mode: "branch" } : {}) } });
@@ -143,7 +166,9 @@ export default class Menu extends View {
 
   render(cx) {
     const t = theme();
-    const list = items(props(), this.git);
+    const flat = flatItems(props(), this.git);
+    const secs = sections(props(), this.git).filter((s) => s.items.length);
+    let row = -1; // flat item index, for the keyboard and choose()
     return v_flex()
       .id("menu")
       .track_focus(this.handle)
@@ -153,18 +178,20 @@ export default class Menu extends View {
       .bg(t.popover)
       .text_size(12.8)
       .on_key_down((e, cx) => {
-        if (e.key === "down") this.at = (this.at + 1) % list.length;
-        else if (e.key === "up") this.at = (this.at + list.length - 1) % list.length;
+        if (e.key === "down") this.at = (this.at + 1) % flat.length;
+        else if (e.key === "up") this.at = (this.at + flat.length - 1) % flat.length;
         else if (e.key === "enter") this.choose(this.at, cx);
         else if (e.key === "escape") closeOverlay(props().overlay);
         else return;
         cx.notify();
       })
-      .children(
-        list.map((it, i) =>
-          v_flex()
-            .when(i > 0 && (closes(it) || it[1] === "app.help" || (it[1] === "app.theme" && list[i - 1][1] !== "app.theme")), el => el.child(div().mx(7).my(4).h(1).bg(t.border)))
-            .child(h_flex()
+      .children(secs.flatMap((s, si) => [
+        ...(si > 0 ? [div().mx(7).mt(4).mb(3).h(1).bg(t.border)] : []),
+        ...(s.label ? [div().px(8).pt(si > 0 ? 1 : 4).pb(2).text_size(10.5).text_color(t.dim).child(s.label)] : []),
+        ...s.items.map((it) => {
+          row += 1;
+          const i = row;
+          return h_flex()
             .id(`mi-${i}`)
             .h(31)
             .px(8)
@@ -174,12 +201,12 @@ export default class Menu extends View {
             .justify_between()
             .text_color(t.foreground)
             .when(i === this.at, (el) => el.bg(t.selected))
-            .hover((s) => s.bg(t.hover))
-            .on_click((_e, cx) => this.choose(i, cx))
+            .hover((s2) => s2.bg(t.hover))
+            .on_click((_e, cx2) => this.choose(i, cx2))
             .child(svg(menuIcon(it)).size(14).flex_none().text_color(t.muted))
             .child(div().flex_1().child(it[0]))
-            .child(div().text_size(11).text_color(t.dim).child(shortcut(it[1], it[2])))),
-        ),
-      );
+            .child(div().text_size(11).text_color(t.dim).child(shortcut(it[1], it[2])));
+        }),
+      ]));
   }
 }
