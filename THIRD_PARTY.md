@@ -4,8 +4,8 @@
 | --- | --- | --- | --- |
 | herdr-automations | [DnzzL/herdr-automations](https://github.com/DnzzL/herdr-automations), © 2026 Thomas Legrand | MIT | `mods/automations/` is its app mod (only `mod.json` adapted); its Go CLI is vendored in `cli/herdr-automations/` with two atomic-write patches — see its `VENDOR.md` |
 | Better Sidebar 3.0.0 | [munza/herdr-mods](https://github.com/munza/herdr-mods), © 2026 Tawsif Aqib | Apache-2.0 | `mods/orca-sidebar/`, modified: see its `CHANGES.md` |
-| Better Changes 2.5.0 | [munza/herdr-mods](https://github.com/munza/herdr-mods), © 2026 Tawsif Aqib | Apache-2.0 | `mods/better-changes/`, unmodified; `place` set to `"none"` (the layout has its own slot) |
-| Better Config 0.1.0 | [munza/herdr-mods](https://github.com/munza/herdr-mods), © 2026 Tawsif Aqib | Apache-2.0 | `mods/better-config/`, unmodified |
+| Better Changes 2.6.0 | [munza/herdr-mods](https://github.com/munza/herdr-mods), © 2026 Tawsif Aqib | Apache-2.0 | `mods/better-changes/`, unmodified; `place` set to `"none"` (the layout has its own slot) |
+| Better Config 0.2.0 | [munza/herdr-mods](https://github.com/munza/herdr-mods), © 2026 Tawsif Aqib | Apache-2.0 | `mods/better-config/`, unmodified |
 | Image Viewer | [dougcunha/herdr-mods](https://github.com/dougcunha/herdr-mods), © 2026 Douglas Cunha | MIT | `mods/image-viewer/`, unmodified; `mods/files-open-with/` opens it for image files (its `mod` menu action and `tabs.js` route) |
 | t3-actions | [JinJieBeWater/herdr-t3](https://github.com/JinJieBeWater/herdr-t3) | Apache-2.0 | `mods/t3-actions/`, modified: see its `CHANGES.md` |
 | herdr-mod-ai-usage (approach only) | [jmalicki/herdr-mod-ai-usage](https://github.com/jmalicki/herdr-mod-ai-usage), © 2026 Joseph Malicki | MIT | `mods/usage-limits/helpers/` asks the `claude` and `codex` CLIs for usage the same way; no code copied |
