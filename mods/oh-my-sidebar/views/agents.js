@@ -87,7 +87,7 @@ export function namePrefix(...names) {
 function grouping(sort, tabName) {
   if (sort === "grouped") return (a) => ({ id: `sp-${a.space}`, label: a.space_name || "" });
   if (sort === "parent") {
-    const parents = shared("orca-sidebar.space-parents") ?? {};
+    const parents = shared("oh-my-sidebar.space-parents") ?? {};
     return (a) => {
       const parent = parents[a.space];
       return parent

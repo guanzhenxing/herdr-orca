@@ -1,4 +1,4 @@
-// node mods/orca-sidebar/git/checkouts.check.cjs: how a checkout is read from Git —
+// node mods/oh-my-sidebar/git/checkouts.check.cjs: how a checkout is read from Git —
 // folder resolution (the first terminal with a cwd defines it), the checkout key, and
 // the porcelain v2 parse (branch, ahead/behind, repo name, worktree detection).
 const assert = require("node:assert/strict");

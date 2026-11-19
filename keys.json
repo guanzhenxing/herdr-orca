@@ -8,13 +8,13 @@
   "terminal": {
     "cmd-shift-e": "mod.open:excalidraw"
   },
-  "layout:orca": {
-    "cmd-shift-a": "orca-sidebar.toggle-list",
-    "cmd-shift-b": "orca-sidebar.toggle-panel",
-    "cmd-alt-]": "orca-sidebar.next-space",
-    "cmd-alt-[": "orca-sidebar.prev-space",
-    "cmd-]": "orca-sidebar.next-agent",
-    "cmd-[": "orca-sidebar.prev-agent",
+  "layout:oh-my-herdr": {
+    "cmd-shift-a": "oh-my-sidebar.toggle-list",
+    "cmd-shift-b": "oh-my-sidebar.toggle-panel",
+    "cmd-alt-]": "oh-my-sidebar.next-space",
+    "cmd-alt-[": "oh-my-sidebar.prev-space",
+    "cmd-]": "oh-my-sidebar.next-agent",
+    "cmd-[": "oh-my-sidebar.prev-agent",
     "cmd-w": "my-tabs.close-tab",
     "cmd-shift-w": "my-tabs.close-pane"
   }

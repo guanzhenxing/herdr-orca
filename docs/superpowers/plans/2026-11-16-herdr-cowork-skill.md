@@ -70,7 +70,7 @@ In the flag loop add the case (before the `*)` arm):
     --with-skills) WITH_SKILLS=1 ;;
 ```
 
-Add `WITH_SKILLS=0` beside `YES=0` / `DRY=0` (line 13-14). After the `layouts/orca.json` guard (line 24) add:
+Add `WITH_SKILLS=0` beside `YES=0` / `DRY=0` (line 13-14). After the `layouts/oh-my-herdr.json` guard (line 24) add:
 
 ```sh
 if [ "$WITH_SKILLS" = 1 ] && [ ! -f skills/herdr-cowork/SKILL.md ]; then

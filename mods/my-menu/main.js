@@ -74,8 +74,8 @@ function sections(p, git) {
         { items: [
           ["Rename", "space.rename", { id: tg.id }],
           ...(git ? [["Project settings…", "project-settings", { space: tg.id }]] : []),
-          // orca-sidebar's folders: a repo files with its worktrees, any other space by itself.
-          // orca-sidebar's worktree notes: one note per checkout, edited in its dialog.
+          // oh-my-sidebar's folders: a repo files with its worktrees, any other space by itself.
+          // oh-my-sidebar's worktree notes: one note per checkout, edited in its dialog.
           ["Note…", "note", { space: tg.id }],
           ["Move to folder…", "move-folder", { space: tg.id }],
         ]},
@@ -154,12 +154,12 @@ export default class Menu extends View {
     else if (it[1] === "worktree") openOverlay({ mod: "new-worktree", kind: "dialog", width: 560, height: 780, props: { space: it[2].space, ...(it[2].action === "open" ? { mode: "branch" } : {}) } });
     else if (it[1] === "move-folder") {
       const s = spaces().find((x) => x.id === it[2].space);
-      const key = shared("orca-sidebar.space-parents")?.[it[2].space]?.key ?? `space:${it[2].space}`;
-      const count = (shared("orca-sidebar.groups")?.groups ?? []).length;
-      openOverlay({ mod: "orca-sidebar", kind: "popup", width: 260, height: Math.min(460, 112 + (count + 1) * 31),
+      const key = shared("oh-my-sidebar.space-parents")?.[it[2].space]?.key ?? `space:${it[2].space}`;
+      const count = (shared("oh-my-sidebar.groups")?.groups ?? []).length;
+      openOverlay({ mod: "oh-my-sidebar", kind: "popup", width: 260, height: Math.min(460, 112 + (count + 1) * 31),
         props: { view: "groups", mode: "move", key, name: s?.name, machine: s?.machine ?? null } });
     }
-    else if (it[1] === "note") openOverlay({ mod: "orca-sidebar", kind: "dialog", width: 460, height: 290, props: { view: "note", space: it[2].space } });
+    else if (it[1] === "note") openOverlay({ mod: "oh-my-sidebar", kind: "dialog", width: 460, height: 290, props: { view: "note", space: it[2].space } });
     else if (it[1] === "hibernate") setShared("hibernate.request", { nonce: Date.now(), ...it[2] });
     else run(it[1], it[2]);
   }

@@ -61,7 +61,7 @@ export default class Tabs extends View {
   init(_props, cx) {
     this.pressed = null;
     this.panels = JSON.parse(localStorage.getItem("panels") ?? "{}");
-    // "close-tab[:id]" / "close-pane[:id]" from cmd-w, cmd-shift-w (layout:orca-* keys) and my-menu's tab Close.
+    // "close-tab[:id]" / "close-pane[:id]" from cmd-w, cmd-shift-w (layout:oh-my-herdr-* keys) and my-menu's tab Close.
     // Only the keys send no id, so only they ask first; menu and button clicks close at once.
     cx.spawn(async (cx) => {
       for (;;) {

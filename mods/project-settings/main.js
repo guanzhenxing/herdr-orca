@@ -1,6 +1,6 @@
 // Project settings, after Orca's: identity (name, icon), worktree defaults and what a new
 // worktree starts with. Kept in shared "projects.settings", keyed by
-// JSON.stringify([machine, main checkout folder]); orca-sidebar and new-worktree read it.
+// JSON.stringify([machine, main checkout folder]); oh-my-sidebar and new-worktree read it.
 // Opened as a dialog with props { space } (my-menu's "Project settings…").
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, TextareaState, Textarea } from "gpui-base";
@@ -9,7 +9,7 @@ import { teamScript, HOOK_VARS } from "./hooks.js";
 
 export const KEY = "projects.settings";
 export const projectKey = (machine, main) => JSON.stringify([machine ?? null, main]);
-const GROUPS = "orca-sidebar.groups";
+const GROUPS = "oh-my-sidebar.groups";
 const COLORS = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
 const ICONS = [["auto", "Automatic"], ["emoji", "Emoji"], ["letter", "Letter"]];
 // new-worktree's built-in prompts (keep in step with its DEFAULTS).

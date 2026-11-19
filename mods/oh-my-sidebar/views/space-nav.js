@@ -2,7 +2,7 @@
 import { spaces, focused, run, shared } from "herdr";
 import { readAgents, subTree } from "./space-agents.js";
 
-export const ORDER_KEY = "orca-sidebar.space-order";
+export const ORDER_KEY = "oh-my-sidebar.space-order";
 
 function spaceOrder() {
   const live = spaces().map((w) => w.id);

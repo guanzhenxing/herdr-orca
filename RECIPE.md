@@ -1,4 +1,4 @@
-# Orca
+# oh-my-herdr
 
 A Herdr layout after the Orca desktop app: a left sidebar of projects with their worktrees nested
 under them and each one's agents and sub-agents nested under that, spaces you can put to sleep and
@@ -7,7 +7,7 @@ framed panes with headers; a hideable right panel with Files and Git changes; an
 Claude/Codex usage limits and live ports. GitHub issues and PRs open in-app, and new worktrees come
 from a branch, an issue, a PR or a new name.
 
-![Orca](preview.png)
+![oh-my-herdr](preview.png)
 
 ## What you see
 
@@ -18,7 +18,7 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
   - `brand` (46px): Herdr's `workspace-chrome` brand row.
   - `sidebar-nav` (70px): Orca-style links, **Automations** and **Issues**, each
     opening its mod as a popup (`automations`, `issues`).
-  - **Spaces** (`orca-sidebar`): one section per machine (a 30px bar: chevron, monitor or
+  - **Spaces** (`oh-my-sidebar`): one section per machine (a 30px bar: chevron, monitor or
     server icon, bold name, a green dot while connected, **+**; a 1px rule above every machine but
     the first), and inside it your **folders** (tinted blocks: chevron, colored folder icon, name,
     count, **⋯**), then the spaces in no folder at the same indent. A repo's main checkout lists its worktrees under it (`├─`/`└─` with a branch icon).
@@ -28,7 +28,7 @@ at 12,16 over the sidebar. The root background is `canvas`; terminals have 14×1
     Under each space or worktree, its **agents** (26px rows lined up with its name: program icon,
     tab name, time in this state, status) and their **sub-agents** (24px rows on tree lines, any
     depth) — always on.
-  - **Agents** tab (`orca-sidebar`, `view: agents`): the sidebar's lists are two tabs sharing the
+  - **Agents** tab (`oh-my-sidebar`, `view: agents`): the sidebar's lists are two tabs sharing the
     full height — **Spaces | Agents** in a segmented tab bar each view draws in its own header
     (active filled, inactive dim; `layout.select` on the `sidebar-lists` stack). The Spaces tab's
     header keeps New folder / New space; the Agents tab's keeps the sort menu (priority, grouped,
@@ -67,7 +67,7 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
   3 sub" with the most urgent status ("Needs you" in full). An agent whose folded sub-agent needs
   you shows "Needs you" itself, so folding never hides it. A sub-agent kept as a pane is listed only under its parent.
   `agent.next` / `agent.prev` follow the spaces list's order, top to bottom, Agents panel or not.
-  `cmd-]` / `cmd-[` (`orca-sidebar.next-agent` / `prev-agent`) step through the same list, sub-agents
+  `cmd-]` / `cmd-[` (`oh-my-sidebar.next-agent` / `prev-agent`) step through the same list, sub-agents
   under their parent: Herdr's own `agent.next` steps from a focused sub-agent as if it were its
   parent, so it can't get past one. The
   footer's orange "N need you" goes to the first agent that needs you. The collapsed rail shows no
@@ -172,11 +172,11 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
 
 ## Built from
 
-`layouts/orca.json` and 25 mods in `mods/`. Shipped mods it uses as-is: `workspace-chrome`, `files`,
+`layouts/oh-my-herdr.json` and 25 mods in `mods/`. Shipped mods it uses as-is: `workspace-chrome`, `files`,
 `changes`, `pane`, `confirm`, `picker`, `machine-add`. Vendored from munza/herdr-mods, unmodified:
 `better-changes` (the `changes` slot, `"place": "none"`) and `better-config`.
 
-- `orca-sidebar` (munza's Better Sidebar, modified; views by `props.view`: spaces, `agents`,
+- `oh-my-sidebar` (munza's Better Sidebar, modified; views by `props.view`: spaces, `agents`,
   `footer`, `panel-toggle`, `card`, `groups`, `note`; `views/space-agents.js` draws agents in the spaces
   list from `agents()` and `terminals()` (`parent`), reusing the Agents panel's helpers), `my-tabs`, `my-pane`, `my-status`, `my-menu`
   (terminal and space menus; `terminal_menu: "my-menu"`), `my-new-menu`, `my-worktree` (remove
@@ -186,12 +186,12 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
   `files-open-with` (+ `file-icons` for Material icons), `t3-actions`, `sidebar-nav`,
   `automations`, `usage-limits` (`helpers/*.sh`), `live-ports`, `desktop-notifications`,
   `hibernate` (`core.js` snapshot/stop/start, `ui.js` dialogs, `settings.js` shared with
-  `orca-sidebar`), `resources` (`measure.js`),
+  `oh-my-sidebar`), `resources` (`measure.js`),
   `new-project`, `open-vscode`, `excalidraw`.
-- Shared state keys: `live-ports`, `orca-sidebar.hover`, `orca-sidebar.inline-agents`,
-  `orca-sidebar.groups` (`{groups: [{id, name, color, home}], projects: {<unit>: <folder id>},
+- Shared state keys: `live-ports`, `oh-my-sidebar.hover`, `oh-my-sidebar.inline-agents`,
+  `oh-my-sidebar.groups` (`{groups: [{id, name, color, home}], projects: {<unit>: <folder id>},
   folds: {"<machine>|<folder id>": bool}}`; a unit is a repo's `JSON.stringify([machine, git common
-  dir])` or `space:<id>`), `orca-sidebar.space-parents` (a repo space's unit, read by `my-menu`; other spaces are `space:<id>`),
+  dir])` or `space:<id>`), `oh-my-sidebar.space-parents` (a repo space's unit, read by `my-menu`; other spaces are `space:<id>`),
   `hibernate.sleeping` (`{space: {at, count}}`), `hibernate.request` (`{nonce, action, space}`, how
   the menu and the meter ask), `hibernate.answer` (the resume dialog's reply), `pane-heads`, `issues.pick`,
   `issues.changed`, `projects.settings` (per `JSON.stringify([machine, main checkout])`: name, icon,
@@ -219,7 +219,7 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
   on the `agents` block), and the layout ships with that block `"hidden": true`.
 - Scrolling slides rows under a still pointer, firing a hover per row. Those hovers must not open
   the card or `setShared` (which redraws every mod in the window): `spaces.js` only treats a hover
-  as real when the pointer moved in the last 150ms, writes `orca-sidebar.hover` only while a card
+  as real when the pointer moved in the last 150ms, writes `oh-my-sidebar.hover` only while a card
   is open, and gives the scroll area a stable `.id("spaces-list")`.
 - There's no element drag-and-drop in mods (`on_drop` is only for files from outside): a drag is
   `on_mouse_down` on a row, then `on_mouse_move` / `on_mouse_up` on whatever is under the pointer,
@@ -249,7 +249,7 @@ Project settings, Excalidraw (cmd-shift-e), Open in VS Code (cmd-g) and context 
 
 ## Done when
 
-- `herdr-app check` passes for every mod, `layout.switch {"name":"orca"}` shows it, and
+- `herdr-app check` passes for every mod, `layout.switch {"name":"oh-my-herdr"}` shows it, and
   `herdr-app status` lists no errors.
 - A repo row shows ⌄ ⋯ + on hover; + opens Create worktree on that repo.
 - An agent shows under its space or worktree; `hc run -- sleep 60` from that agent shows a nested

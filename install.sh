@@ -24,7 +24,7 @@ for arg in "$@"; do
 done
 
 command -v jq >/dev/null 2>&1 || { echo "install.sh needs jq"; exit 1; }
-[ -f layouts/orca.json ] || { echo "layouts/orca.json missing from the repo"; exit 1; }
+[ -f layouts/oh-my-herdr.json ] || { echo "layouts/oh-my-herdr.json missing from the repo"; exit 1; }
 if [ "$WITH_SKILLS" = 1 ] && [ ! -f skills/herdr-cowork/SKILL.md ]; then
   echo "skills/herdr-cowork/SKILL.md missing from the repo"; exit 1
 fi
@@ -53,13 +53,13 @@ done
 
 # The app stamps a cloned_from on the home layout; sync.sh strips it, so compare without it.
 layout_tmp=""
-if [ ! -e "$HOME_DIR/layouts/orca.json" ]; then
+if [ ! -e "$HOME_DIR/layouts/oh-my-herdr.json" ]; then
   install_layout=1
 else
   layout_tmp=$(mktemp)
   trap 'rm -f "$layout_tmp"' EXIT
-  jq 'del(.cloned_from)' "$HOME_DIR/layouts/orca.json" > "$layout_tmp" 2>/dev/null || cp "$HOME_DIR/layouts/orca.json" "$layout_tmp"
-  if [ "$YES" = 1 ] || cmp -s layouts/orca.json "$layout_tmp"; then
+  jq 'del(.cloned_from)' "$HOME_DIR/layouts/oh-my-herdr.json" > "$layout_tmp" 2>/dev/null || cp "$HOME_DIR/layouts/oh-my-herdr.json" "$layout_tmp"
+  if [ "$YES" = 1 ] || cmp -s layouts/oh-my-herdr.json "$layout_tmp"; then
     install_layout=1
   else
     install_layout=0
@@ -150,7 +150,7 @@ echo "Install from $(pwd) into $HOME_DIR"
 [ -n "$uptodate_mods" ] && say "up to date:$uptodate_mods"
 [ -n "$install_mods" ] && say "mods to install:$install_mods"
 [ -n "$kept_mods" ] && say "kept, you already have different ones:$kept_mods (rerun with --yes to overwrite)"
-if [ "$install_layout" = 1 ]; then say "layout: layouts/orca.json"; elif [ "$kept_layout" = 1 ]; then say "kept your layouts/orca.json (differs; rerun with --yes to overwrite)"; fi
+if [ "$install_layout" = 1 ]; then say "layout: layouts/oh-my-herdr.json"; elif [ "$kept_layout" = 1 ]; then say "kept your layouts/oh-my-herdr.json (differs; rerun with --yes to overwrite)"; fi
 if [ "$install_keys" = 1 ]; then say "keys.json: none yet, installing the package's"
 elif [ "$keys_changed" = 1 ]; then say "keys.json: merging in new bindings"
 elif [ "$keys_conflicts" = "" ]; then say "keys.json: already merged"; fi
@@ -182,7 +182,7 @@ for name in $install_mods; do
     mv "$HOME_DIR/mods/$name/mod.json.tmp" "$HOME_DIR/mods/$name/mod.json"
   fi
 done
-[ "$install_layout" = 1 ] && cp layouts/orca.json "$HOME_DIR/layouts/orca.json"
+[ "$install_layout" = 1 ] && cp layouts/oh-my-herdr.json "$HOME_DIR/layouts/oh-my-herdr.json"
 if [ "$install_keys" = 1 ]; then
   cp keys.json "$HOME_DIR/keys.json"
 elif [ "$keys_changed" = 1 ]; then
@@ -286,4 +286,4 @@ else
 fi
 
 [ -n "$keys_conflicts" ] && echo "Keys you kept are listed above; take the package's binding by editing $HOME_DIR/keys.json."
-echo "Done. Switch with: herdr-app do layout.switch '{\"name\":\"orca\"}'  (ctrl-shift-l switches back)"
+echo "Done. Switch with: herdr-app do layout.switch '{\"name\":\"oh-my-herdr\"}'  (ctrl-shift-l switches back)"

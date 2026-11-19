@@ -1,4 +1,4 @@
-// node mods/orca-sidebar/git/pr-status.check.cjs: repository URL parsing, PR appearance,
+// node mods/oh-my-sidebar/git/pr-status.check.cjs: repository URL parsing, PR appearance,
 // how long a status may stand, the gh query cache, and the one GitHub-unavailable notice.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");

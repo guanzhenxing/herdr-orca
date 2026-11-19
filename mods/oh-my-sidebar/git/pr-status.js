@@ -5,7 +5,7 @@ import * as fs from "fs/promises";
 
 // The last status, ETags and check times survive restarts, so a reopened app shows the
 // badges at once and asks GitHub only what may have changed (304s are free).
-const saved = () => `${appHome()}/data/orca-sidebar/pr-status.json`;
+const saved = () => `${appHome()}/data/oh-my-sidebar/pr-status.json`;
 
 export const PR_POLL_MS = 60000;
 const MIN = 60000;
@@ -23,7 +23,7 @@ function ghNotice(detail) {
   ghNoticeShown = true;
   setShared("github.unavailable.at", Date.now());
   notify({
-    title: "orca-sidebar: GitHub unavailable",
+    title: "oh-my-sidebar: GitHub unavailable",
     body: `${detail || "gh did not answer"}. Issue and PR badges stay hidden until gh is installed and gh auth login has run.`,
     level: "warning",
   });
@@ -98,7 +98,7 @@ export class PRStatusObserver {
 
   async save() {
     const d = { entries: [...this.entries], checked: [...this.checked], probes: [...this.probes].map(([k, v]) => [k, { etag: v.etag }]) };
-    try { await fs.mkdir(`${appHome()}/data/orca-sidebar`, { recursive: true }); await fs.writeFile(saved(), JSON.stringify(d)); } catch {}
+    try { await fs.mkdir(`${appHome()}/data/oh-my-sidebar`, { recursive: true }); await fs.writeFile(saved(), JSON.stringify(d)); } catch {}
   }
 
   // Did anything in these repositories change on GitHub? One conditional request per repo

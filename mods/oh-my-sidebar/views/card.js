@@ -8,9 +8,9 @@ import { prAppearance } from "../git/pr-status.js";
 import { TEXT, SIZE, RADIUS, Icon } from "./ui.js";
 import { noteOf, openNote } from "./notes.js";
 
-export const HOVER_KEY = "orca-sidebar.hover";
+export const HOVER_KEY = "oh-my-sidebar.hover";
 // A hovered row's fresh PR and issue (spaces.js refreshHovered): { space, prs?, issue?, loading }.
-export const LIVE_KEY = "orca-sidebar.card-live";
+export const LIVE_KEY = "oh-my-sidebar.card-live";
 
 const ago = (ms) => {
   const s = Math.max(0, Math.round((Date.now() - ms) / 1000));

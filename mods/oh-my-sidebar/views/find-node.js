@@ -8,8 +8,8 @@ export function findNode(node, id) {
   return null;
 }
 
-// Whether the layout has a spaces list (a orca-sidebar block without a `view`).
+// Whether the layout has a spaces list (a oh-my-sidebar block without a `view`).
 export function hasSpacesView(node) {
-  if (node?.mod === "orca-sidebar" && !node.props?.view) return true;
+  if (node?.mod === "oh-my-sidebar" && !node.props?.view) return true;
   return (node?.children ?? []).some(hasSpacesView);
 }

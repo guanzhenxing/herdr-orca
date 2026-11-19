@@ -138,7 +138,7 @@ export class Spaces {
     } catch {
       /* Ignore invalid saved UI state. */
     }
-    // "orca-sidebar.new-group" in keys.json asks for a new folder's name.
+    // "oh-my-sidebar.new-group" in keys.json asks for a new folder's name.
     cx.spawn(async () => {
       for (;;) if ((await nextCommand()) === "new-group") openNameDialog(null, this.focusedMachine());
     });
@@ -153,9 +153,9 @@ export class Spaces {
   // Read the installed mod.json once; Herdr restarts the mod when it changes.
   applySettings(cx) {
     cx.spawn(async (cx) => {
-      const { settings, problems } = await loadSettings("orca-sidebar", DEFAULT_SETTINGS);
+      const { settings, problems } = await loadSettings("oh-my-sidebar", DEFAULT_SETTINGS);
       this.settings = settings;
-      for (const problem of problems) console.warn(`orca-sidebar mod.json settings: ${problem}`);
+      for (const problem of problems) console.warn(`oh-my-sidebar mod.json settings: ${problem}`);
       cx.notify();
     });
   }
@@ -390,7 +390,7 @@ export class Spaces {
     const text = JSON.stringify(parents);
     if (text === this.parentsText) return;
     this.parentsText = text;
-    setShared("orca-sidebar.space-parents", parents);
+    setShared("oh-my-sidebar.space-parents", parents);
   }
 
   // Space ids top to bottom as drawn: machines, your groups, repos with their
@@ -456,7 +456,7 @@ export class Spaces {
       });
   }
 
-  // Shares navOrder for orca-sidebar.next-space / prev-space (views/space-nav.js).
+  // Shares navOrder for oh-my-sidebar.next-space / prev-space (views/space-nav.js).
   publishOrder() {
     const order = this.navOrder();
     const text = JSON.stringify(order);
@@ -1287,7 +1287,7 @@ export class Spaces {
     if (h.row !== w.id) setShared(HOVER_KEY, { ...h, row: w.id });
     // A window, not a popup: it doesn't take the keyboard from the terminal.
     const id = openOverlay({
-      mod: "orca-sidebar",
+      mod: "oh-my-sidebar",
       kind: "window",
       width: 340,
       at: { x: b.x + b.width + 8, y: b.y },
@@ -1495,7 +1495,7 @@ export class Spaces {
     // agent.next / agent.prev follow this list's space order, Agents panel or not.
     setAgentOrder(this.agents.order(this.navOrder()));
     return v_flex()
-      .id("orca-sidebar-root")
+      .id("oh-my-sidebar-root")
       .size_full()
       .min_h(0)
       .bg(t.chrome)

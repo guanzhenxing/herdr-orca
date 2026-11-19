@@ -5,7 +5,7 @@
 
 ## 背景
 
-[ninehills 的 cowork skill](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)（v1.1.0）是一份多 Agent 协作流程协议：让运行在 Herdr 终端里的任一 CLI agent 担任 Commander，通过 `hc` CLI 启动、委派、核验、清理成员 agent，以 TEAM.md 为共享注册表。它编排 agent，而 herdr-orca 可视化 agent——两者互补。
+[ninehills 的 cowork skill](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)（v1.1.0）是一份多 Agent 协作流程协议：让运行在 Herdr 终端里的任一 CLI agent 担任 Commander，通过 `hc` CLI 启动、委派、核验、清理成员 agent，以 TEAM.md 为共享注册表。它编排 agent，而 oh-my-herdr 可视化 agent——两者互补。
 
 **许可记录**：上游 gist 未声明任何许可证；维护者评估后决定将全文 vendor 入本 Apache-2.0 仓库。THIRD_PARTY.md 的 License 列如实写 "none stated"，NOTICE 增加署名行，不对此作法律结论。
 
@@ -65,7 +65,7 @@ usage 注释与 flag 解析加 `--with-skills`。
 
 **环节结构（关键——dry-run 门约束）**：现有脚本是"判定 → `say()` 报告 → dry-run 在 L93 `exit 0` → 写入"四段。skill 环节必须拆成两半嵌入：
 
-- **前置守卫**（flag 解析后）：`[ "$WITH_SKILLS" = 1 ] && { [ -f skills/herdr-cowork/SKILL.md ] || { echo "skills/herdr-cowork/SKILL.md missing"; exit 1; } }`（仿 L24 对 layouts/orca.json 的先例）
+- **前置守卫**（flag 解析后）：`[ "$WITH_SKILLS" = 1 ] && { [ -f skills/herdr-cowork/SKILL.md ] || { echo "skills/herdr-cowork/SKILL.md missing"; exit 1; } }`（仿 L24 对 layouts/oh-my-herdr.json 的先例）
 - **判定+报告**：与 mods 判定（L33-54）同区，全部状态判定在 dry-run 门**之前**完成，结果经 `say()` 并入报告块（L84-91）
 - **写入块**：置于 herdr-automations CLI 环节**之后**、收尾提示之前
 

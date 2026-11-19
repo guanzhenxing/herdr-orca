@@ -17,6 +17,6 @@ for mod in mods/*/; do
     jq 'del(.settings)' "mods/$name/mod.json" > "mods/$name/mod.json.tmp" && mv "mods/$name/mod.json.tmp" "mods/$name/mod.json"
   fi
 done
-# The layout file: honors HERDR_ORCA_LAYOUT, default layouts/orca.json.
-jq 'del(.cloned_from)' "${HERDR_ORCA_LAYOUT:-$HOME_DIR/layouts/orca.json}" > layouts/orca.json
-echo "Synced $(ls mods | wc -l | tr -d ' ') mods and layouts/orca.json"
+# The layout file: honors HERDR_ORCA_LAYOUT, default layouts/oh-my-herdr.json.
+jq 'del(.cloned_from)' "${HERDR_ORCA_LAYOUT:-$HOME_DIR/layouts/oh-my-herdr.json}" > layouts/oh-my-herdr.json
+echo "Synced $(ls mods | wc -l | tr -d ' ') mods and layouts/oh-my-herdr.json"

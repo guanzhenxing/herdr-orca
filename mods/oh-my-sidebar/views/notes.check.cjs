@@ -1,4 +1,4 @@
-// node mods/orca-sidebar/views/notes.check.cjs: worktree notes are kept per checkout and edited in the dialog.
+// node mods/oh-my-sidebar/views/notes.check.cjs: worktree notes are kept per checkout and edited in the dialog.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");

@@ -1,4 +1,4 @@
-# Orca for Herdr
+# oh-my-herdr
 
 A Herdr Desktop layout after the Orca app: projects with nested worktrees and their issue/PR
 badges, each one's agents and sub-agents right under it, spaces you can put to sleep (and agents
@@ -6,7 +6,7 @@ resumed after a restart), a resource meter, a hover card per worktree, in-app Gi
 (from a branch, an issue, a PR or a new name), Files and Git changes panels, run actions, usage
 limits and live ports.
 
-![Orca](preview.png)
+![oh-my-herdr](preview.png)
 
 See [RECIPE.md](RECIPE.md) for what it does and how it's built, and
 [THIRD_PARTY.md](THIRD_PARTY.md) for credits and licenses. The issues, live ports, usage limits and
@@ -17,7 +17,7 @@ actions mods are also published on their own in
 
 Ask your Herdr agent:
 
-> Read ~/.config/herdr-app/AGENTS.md, then add this layout: https://github.com/VladTemp27/herdr-orca
+> Read ~/.config/herdr-app/AGENTS.md, then add this layout: https://github.com/VladTemp27/oh-my-herdr
 
 Then two mods by [munza](https://github.com/munza/herdr-mods) that the layout also uses,
 vendored in this repo (`mods/better-changes/`, `mods/better-config/`) — nothing to add by hand.
@@ -41,16 +41,16 @@ symlinks.
 
 By hand:
 
-1. Copy `layouts/orca.json` into `~/.config/herdr-app/layouts/` and each folder in `mods/` into
+1. Copy `layouts/oh-my-herdr.json` into `~/.config/herdr-app/layouts/` and each folder in `mods/` into
    `~/.config/herdr-app/mods/`. Rename anything whose name you already use. Better Changes ships
    with `"place": "none"` — the layout already has a slot for it.
-2. Merge `keys.json` into `~/.config/herdr-app/keys.json` (its `layout:orca` section applies only
+2. Merge `keys.json` into `~/.config/herdr-app/keys.json` (its `layout:oh-my-herdr` section applies only
    while this layout shows).
 3. Run `herdr-app check ~/.config/herdr-app/mods/<name>` for each mod, then
-   `herdr-app do layout.switch '{"name":"orca"}'`. `ctrl-shift-l` switches back.
+   `herdr-app do layout.switch '{"name":"oh-my-herdr"}'`. `ctrl-shift-l` switches back.
 
 Keys follow Herdr's own conventions: `cmd-n` stays "New space", and the Create worktree
-dialog opens with `cmd-alt-n` instead. Everything in `keys.json`'s `layout:orca` section
+dialog opens with `cmd-alt-n` instead. Everything in `keys.json`'s `layout:oh-my-herdr` section
 (agent navigation, the sidebar panel toggle, closing tabs and panes) applies only while this
 layout is shown, so it never shadows the keys of your other layouts.
 

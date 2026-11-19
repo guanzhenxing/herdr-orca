@@ -39,7 +39,7 @@
                   "id": "spaces",
                   "type": "block",
                   "content": {
-                    "mod": "orca-sidebar"
+                    "mod": "oh-my-sidebar"
                   },
                   "size": {
                     "weight": 1
@@ -50,7 +50,7 @@
                   "id": "agents",
                   "type": "block",
                   "content": {
-                    "mod": "orca-sidebar",
+                    "mod": "oh-my-sidebar",
                     "props": {
                       "view": "agents"
                     }
@@ -67,7 +67,7 @@
               "id": "sidebar-footer",
               "type": "block",
               "content": {
-                "mod": "orca-sidebar",
+                "mod": "oh-my-sidebar",
                 "props": {
                   "view": "footer"
                 }
@@ -120,7 +120,7 @@
                   "id": "panel-toggle",
                   "type": "block",
                   "content": {
-                    "mod": "orca-sidebar",
+                    "mod": "oh-my-sidebar",
                     "props": {
                       "view": "panel-toggle",
                       "target": "panel"

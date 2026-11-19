@@ -8,7 +8,7 @@ import { RANK, kidStatus, duration, icon, agentLabel, statusMark } from "./agent
 
 // Spaces drawing agents inline; the footer's count reads it. Always on since the
 // Spaces/Agents tabs arrived (spaces.js migrates an old off value once).
-export const INLINE_KEY = "orca-sidebar.inline-agents";
+export const INLINE_KEY = "oh-my-sidebar.inline-agents";
 export const inlineAgents = () => shared(INLINE_KEY) ?? true;
 
 const urgent = (statuses) => statuses.reduce((m, s) => ((RANK[s] ?? 0) > (RANK[m] ?? 0) ? s : m), null);
