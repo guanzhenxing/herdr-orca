@@ -17,7 +17,7 @@
 
 布局还用到 [munza](https://github.com/munza/herdr-mods) 的两个 mod，已收编在本仓库（`mods/better-changes/`、`mods/better-config/`）——无需手动添加。
 
-或者，从本仓库的克隆里一条命令完成：`sh install.sh`（`--yes` 会覆盖已有的 mods 和布局——加上 `--with-skills` 时还会替换不一致的 skill 副本，并**删除下方链接位置里用户自装的 `herdr-cowork` 目录**；`--dry-run` 可先预览）。它会合并 `keys.json`——你已占用的按键保留原有动作——按 `mod.schema.json` 的描述保留 Mod 设置，对安装的每个 mod 跑 `herdr-app check`，且从不碰它不随包发布的 mod。
+或者，从本仓库的克隆里一条命令完成：`sh install.sh`（`--yes` 会覆盖已有的 mods 和布局——加上 `--with-skills` 时还会替换不一致的 skill 副本，并**删除下方链接位置里用户自装的 `herdr-cowork` 目录**；`--dry-run` 可先预览）。它会合并 `keys.json`——你已占用的按键保留原有动作——并把 Herdr 自带的默认键补回来（见下方守卫说明；`keys.json` 被 `cp` 覆盖或在 app 首次运行前装入局部文件会静默丢掉全部默认键，含 `cmd-v` 粘贴；补齐时会打印 `restored N Herdr default binding(s)`）。它按 `mod.schema.json` 的描述保留 Mod 设置，对安装的每个 mod 跑 `herdr-app check`，且从不碰它不随包发布的 mod。日常部署改动时请勿 `cp` 仓库的 keys.json 直盖 `~/.config/herdr-app/keys.json`，只用本脚本或手动 merge。
 
 加 `--with-skills` 还会安装 [herdr-cowork](https://gist.github.com/ninehills/eef70810238f779362a820786ae4a096)
 agent skill（收编在 `skills/`，可选）。SKILL.md 会装到 `~/.agents/skills/herdr-cowork/`
